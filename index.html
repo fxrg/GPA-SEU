@@ -115,6 +115,10 @@
                 <button class="save-btn" onclick="saveResults()">
                     <i class="fas fa-save"></i> حفظ النتائج
                 </button>
+                <button class="import-btn" onclick="document.getElementById('importFile').click()">
+                    <i class="fas fa-upload"></i> استيراد البيانات
+                </button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
             </div>
         </div>
 
@@ -210,6 +214,41 @@
             </div>
         </div>
     </div>
+
+    <!-- الفوتر -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>حاسبة GPA</h3>
+                <p>موقع طلابي لتسهيل حساب المعدل التراكمي</p>
+                <p>من تطوير طلاب كلية الحوسبة والمعلوماتية</p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>روابط مهمة</h3>
+                <div class="footer-links">
+                    <a href="https://t.me/Computing_and_Informatics" target="_blank" class="footer-link">
+                        <i class="fab fa-telegram"></i>
+                        قروب كلية الحوسبة
+                    </a>
+                    <a href="https://t.me/archivesSEU" target="_blank" class="footer-link">
+                        <i class="fas fa-archive"></i>
+                        قناة أرشيف الجامعة
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>الجامعة السعودية الإلكترونية</h3>
+                <p>SEU - Saudi Electronic University</p>
+                <p>كلية الحوسبة والمعلوماتية</p>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2024 حاسبة GPA - تطوير طلابي</p>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>

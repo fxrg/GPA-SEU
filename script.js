@@ -243,11 +243,30 @@ function saveResults() {
     }
 
     const results = {
-        courses: courses,
-        gpa: parseFloat(document.getElementById('semesterGPA').textContent),
-        totalHours: parseInt(document.getElementById('totalHours').textContent),
-        totalPoints: parseFloat(document.getElementById('totalPoints').textContent),
-        date: new Date().toLocaleString('ar-SA')
+        version: "1.0",
+        university: "الجامعة السعودية الإلكترونية",
+        college: "كلية الحوسبة والمعلوماتية",
+        developer: "طلاب كلية الحوسبة",
+        exportDate: new Date().toISOString(),
+        exportDateArabic: new Date().toLocaleString('ar-SA'),
+        semesterData: {
+            courses: courses,
+            gpa: parseFloat(document.getElementById('semesterGPA').textContent),
+            totalHours: parseInt(document.getElementById('totalHours').textContent),
+            totalPoints: parseFloat(document.getElementById('totalPoints').textContent)
+        },
+        cumulativeData: {
+            currentGPA: parseFloat(document.getElementById('currentGPA').value) || 0,
+            currentHours: parseInt(document.getElementById('currentHours').value) || 0,
+            newGPA: parseFloat(document.getElementById('newCumulativeGPA').textContent) || 0,
+            totalCumulativeHours: parseInt(document.getElementById('totalCumulativeHours').textContent) || 0
+        },
+        metadata: {
+            totalCourses: courses.length,
+            coursesWithGrades: courses.filter(c => c.grade !== 'NP' && c.grade !== 'NF').length,
+            coursesWithNP: courses.filter(c => c.grade === 'NP').length,
+            coursesWithNF: courses.filter(c => c.grade === 'NF').length
+        }
     };
 
     // حفظ في localStorage
@@ -260,12 +279,75 @@ function saveResults() {
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `GPA_Results_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `SEU_GPA_Results_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     
     URL.revokeObjectURL(url);
 
     showNotification('تم حفظ النتائج بنجاح', 'success');
+}
+
+// استيراد البيانات
+function importData(input) {
+    const file = input.files[0];
+    if (!file) {
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // التحقق من صحة البيانات
+            if (!importedData.semesterData || !importedData.semesterData.courses) {
+                showNotification('ملف غير صالح - يرجى التأكد من أن الملف يحتوي على بيانات صحيحة', 'error');
+                return;
+            }
+
+            // استيراد المواد
+            courses.length = 0; // مسح المواد الحالية
+            importedData.semesterData.courses.forEach(course => {
+                courses.push({
+                    id: courseId++,
+                    name: course.name,
+                    hours: course.hours,
+                    grade: course.grade,
+                    points: course.points
+                });
+            });
+
+            // استيراد بيانات GPA التراكمي إذا كانت موجودة
+            if (importedData.cumulativeData) {
+                document.getElementById('currentGPA').value = importedData.cumulativeData.currentGPA || '';
+                document.getElementById('currentHours').value = importedData.cumulativeData.currentHours || '';
+            }
+
+            // تحديث الواجهة
+            updateCoursesList();
+            updateResults();
+            saveToLocalStorage();
+
+            // إظهار رسالة نجاح مع تفاصيل
+            const courseCount = importedData.semesterData.courses.length;
+            const gpa = importedData.semesterData.gpa;
+            showNotification(`تم استيراد ${courseCount} مادة بنجاح - GPA: ${gpa}`, 'success');
+
+            // إعادة حساب GPA التراكمي إذا كانت البيانات متوفرة
+            if (importedData.cumulativeData && importedData.cumulativeData.currentGPA > 0) {
+                calculateCumulative();
+            }
+
+        } catch (error) {
+            console.error('خطأ في قراءة الملف:', error);
+            showNotification('خطأ في قراءة الملف - يرجى التأكد من صحة الملف', 'error');
+        }
+    };
+
+    reader.readAsText(file);
+    
+    // مسح قيمة input للسماح بقراءة نفس الملف مرة أخرى
+    input.value = '';
 }
 
 // الحفظ في localStorage
