@@ -1,0 +1,922 @@
+/* إعدادات عامة */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    direction: rtl;
+    line-height: 1.6;
+    color: #333;
+    min-height: 100vh;
+}
+
+/* الهيدر */
+.header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.logo-text h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.logo-text p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.header-info {
+    text-align: center;
+}
+
+.header-info h2 {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.header-info p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* الحاوية الرئيسية */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* البطاقات */
+.card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+}
+
+.card h2 {
+    color: #1e3c72;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.card h2 i {
+    color: #667eea;
+}
+
+/* نموذج إضافة المواد */
+.add-course-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-group label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.input-group input,
+.input-group select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.add-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* قائمة المواد */
+.courses-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.course-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.course-item:hover {
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border-color: #667eea;
+}
+
+.course-name {
+    font-weight: 600;
+    color: #1e3c72;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.course-details {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.delete-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.delete-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+/* النتائج */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.result-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+}
+
+.result-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.gpa-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.result-card p {
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* الأزرار */
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.clear-btn, .save-btn {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 140px;
+    justify-content: center;
+}
+
+.clear-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+}
+
+.clear-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.save-btn {
+    background: linear-gradient(135deg, #2ed573 0%, #1e90ff 100%);
+    color: white;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(46, 213, 115, 0.3);
+}
+
+/* قسم GPA التراكمي */
+.cumulative-section {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.cumulative-input {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 1.5rem;
+    align-items: end;
+    margin-bottom: 2rem;
+}
+
+.calculate-btn {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 200px;
+    justify-content: center;
+}
+
+.calculate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 60, 114, 0.3);
+}
+
+.cumulative-results {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.cumulative-results h3 {
+    color: #1e3c72;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.cumulative-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.cumulative-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+}
+
+.cumulative-card h4 {
+    color: #495057;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.gpa-change {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.gpa-change.positive {
+    color: #2ed573;
+}
+
+.gpa-change.negative {
+    color: #ff6b6b;
+}
+
+.gpa-change.neutral {
+    color: #6c757d;
+}
+
+#changeDescription {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* قسم المعلومات */
+.info-section {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    padding: 2rem;
+    border: 1px solid #e9ecef;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.info-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+}
+
+.info-card h4 {
+    color: #1e3c72;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 0.5rem;
+}
+
+.info-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.info-card li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+.info-card li:last-child {
+    border-bottom: none;
+}
+
+/* الحالة الفارغة */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #dee2e6;
+}
+
+/* الإشعارات */
+.notification {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    max-width: 400px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 20px;
+    animation: slideIn 0.3s ease;
+}
+
+.notification-success {
+    border-left: 4px solid #2ed573;
+}
+
+.notification-error {
+    border-left: 4px solid #ff6b6b;
+}
+
+.notification-warning {
+    border-left: 4px solid #ffa502;
+}
+
+.notification-info {
+    border-left: 4px solid #667eea;
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.notification-content i {
+    font-size: 1.2rem;
+}
+
+.notification-success .notification-content i {
+    color: #2ed573;
+}
+
+.notification-error .notification-content i {
+    color: #ff6b6b;
+}
+
+.notification-warning .notification-content i {
+    color: #ffa502;
+}
+
+.notification-info .notification-content i {
+    color: #667eea;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.notification-close:hover {
+    background: #f1f1f1;
+    color: #666;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* التصميم المتجاوب - تحسينات للجوال */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 1.5rem;
+    }
+    
+    .add-course-form {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .add-btn {
+        grid-column: 1 / -1;
+        margin-top: 0.5rem;
+    }
+    
+    .cumulative-input {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .calculate-btn {
+        grid-column: 1 / -1;
+        margin-top: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+    
+    .header-content {
+        padding: 0 1rem;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .logo {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.3rem;
+    }
+    
+    .header-info h2 {
+        font-size: 1.1rem;
+    }
+    
+    .card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card h2 {
+        font-size: 1.3rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .add-course-form {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .add-btn {
+        grid-column: 1;
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .cumulative-input {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .calculate-btn {
+        grid-column: 1;
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .result-card {
+        padding: 1.5rem;
+    }
+    
+    .gpa-value {
+        font-size: 2rem;
+    }
+    
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+    }
+    
+    .actions button {
+        width: 100%;
+        max-width: 300px;
+        min-width: auto;
+    }
+    
+    .cumulative-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .cumulative-card {
+        padding: 1.2rem;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .info-card {
+        padding: 1.2rem;
+    }
+    
+    .course-item {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        padding: 1.2rem;
+    }
+    
+    .delete-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .notification {
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 0.8rem;
+        margin: 0.8rem auto;
+    }
+    
+    .header {
+        padding: 0.8rem 0;
+    }
+    
+    .header-content {
+        padding: 0 0.8rem;
+    }
+    
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.1rem;
+    }
+    
+    .logo-text p {
+        font-size: 0.8rem;
+    }
+    
+    .header-info h2 {
+        font-size: 1rem;
+    }
+    
+    .header-info p {
+        font-size: 0.8rem;
+    }
+    
+    .card {
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    .card h2 {
+        font-size: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .input-group label {
+        font-size: 0.85rem;
+    }
+    
+    .input-group input,
+    .input-group select {
+        padding: 0.7rem 0.8rem;
+        font-size: 0.95rem;
+    }
+    
+    .add-btn,
+    .clear-btn,
+    .save-btn,
+    .calculate-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.95rem;
+    }
+    
+    .result-card {
+        padding: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    .result-card h3 {
+        font-size: 1rem;
+    }
+    
+    .gpa-value {
+        font-size: 1.8rem;
+    }
+    
+    .result-card p {
+        font-size: 0.85rem;
+    }
+    
+    .course-item {
+        padding: 1rem;
+        border-radius: 8px;
+    }
+    
+    .course-name {
+        font-size: 1rem;
+    }
+    
+    .course-details {
+        font-size: 0.85rem;
+    }
+    
+    .delete-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
+    .cumulative-section {
+        padding: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    .cumulative-results {
+        padding: 1.2rem;
+    }
+    
+    .cumulative-card {
+        padding: 1rem;
+    }
+    
+    .cumulative-card h4 {
+        font-size: 0.95rem;
+    }
+    
+    .gpa-change {
+        font-size: 1.3rem;
+    }
+    
+    .info-section {
+        padding: 1.2rem;
+        border-radius: 12px;
+    }
+    
+    .info-card {
+        padding: 1rem;
+    }
+    
+    .info-card h4 {
+        font-size: 1rem;
+    }
+    
+    .info-card li {
+        font-size: 0.9rem;
+        padding: 0.4rem 0;
+    }
+    
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+    
+    .empty-state i {
+        font-size: 2.5rem;
+    }
+    
+    .empty-state p {
+        font-size: 0.9rem;
+    }
+}
+
+/* تحسينات خاصة باللمس للجوال */
+@media (hover: none) and (pointer: coarse) {
+    .card:hover {
+        transform: none;
+    }
+    
+    .result-card:hover {
+        transform: none;
+    }
+    
+    .add-btn:hover,
+    .clear-btn:hover,
+    .save-btn:hover,
+    .calculate-btn:hover,
+    .delete-btn:hover {
+        transform: none;
+    }
+    
+    .course-item:hover {
+        background: #f8f9fa;
+        box-shadow: none;
+    }
+    
+    /* تحسين أحجام الأزرار لللمس */
+    .add-btn,
+    .clear-btn,
+    .save-btn,
+    .calculate-btn {
+        min-height: 44px;
+    }
+    
+    .delete-btn {
+        min-height: 40px;
+    }
+    
+    .input-group input,
+    .input-group select {
+        min-height: 44px;
+    }
+}
+
+/* تحسين العرض للشاشات الصغيرة جداً */
+@media (max-width: 360px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+    
+    .header-content {
+        padding: 0 0.5rem;
+    }
+    
+    .card {
+        padding: 1rem;
+    }
+    
+    .logo-text h1 {
+        font-size: 1rem;
+    }
+    
+    .header-info h2 {
+        font-size: 0.9rem;
+    }
+    
+    .gpa-value {
+        font-size: 1.6rem;
+    }
+} 
