@@ -24,10 +24,18 @@
                     <p>Saudi Electronic University</p>
                 </div>
             </div>
-            <div class="header-info">
-                <h2>حاسبة المعدل التراكمي GPA</h2>
-                <p>نظام حساب المعدل التراكمي للطلاب</p>
-            </div>
+                         <div class="header-info">
+                 <h2 data-ar="حاسبة المعدل التراكمي GPA" data-en="GPA Calculator">حاسبة المعدل التراكمي GPA</h2>
+                 <p data-ar="نظام حساب المعدل التراكمي للطلاب" data-en="Student GPA Calculation System">نظام حساب المعدل التراكمي للطلاب</p>
+             </div>
+             <div class="header-controls">
+                 <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع المظلم">
+                     <i class="fas fa-moon"></i>
+                 </button>
+                 <button class="language-toggle" onclick="toggleLanguage()" title="تغيير اللغة">
+                     <i class="fas fa-language"></i>
+                 </button>
+             </div>
         </div>
     </header>
 
@@ -35,24 +43,24 @@
     <div class="container">
         <!-- قسم إضافة المواد -->
         <div class="card">
-            <h2><i class="fas fa-plus-circle"></i> إضافة مادة جديدة</h2>
+                         <h2><i class="fas fa-plus-circle"></i> <span data-ar="إضافة مادة جديدة" data-en="Add New Course">إضافة مادة جديدة</span></h2>
             
             <div class="add-course-form">
                 <div class="input-group">
-                    <label for="courseName">اسم المادة:</label>
-                    <input type="text" id="courseName" placeholder="مثال: الرياضيات 251" required>
+                    <label for="courseName" data-ar="اسم المادة (اختياري):" data-en="Course Name (Optional):">اسم المادة (اختياري):</label>
+                    <input type="text" id="courseName" placeholder="مثال: الرياضيات 251" data-ar-placeholder="مثال: الرياضيات 251" data-en-placeholder="Example: Math 251">
                 </div>
                 
                 <div class="input-group">
-                    <label for="courseHours">عدد الساعات:</label>
+                    <label for="courseHours" data-ar="عدد الساعات:" data-en="Credit Hours:">عدد الساعات:</label>
                     <select id="courseHours">
-                        <option value="3">3 ساعات</option>
-                        <option value="2">2 ساعات</option>
+                        <option value="3" data-ar="3 ساعات" data-en="3 Hours">3 ساعات</option>
+                        <option value="2" data-ar="2 ساعات" data-en="2 Hours">2 ساعات</option>
                     </select>
                 </div>
                 
                 <div class="input-group">
-                    <label for="courseGrade">الدرجة:</label>
+                    <label for="courseGrade" data-ar="الدرجة:" data-en="Grade:">الدرجة:</label>
                     <select id="courseGrade">
                         <option value="12">A+ (12)</option>
                         <option value="11.3">A (11.3)</option>
@@ -63,60 +71,60 @@
                         <option value="4.5">D+ (4.5)</option>
                         <option value="3">D (3)</option>
                         <option value="0">F (0)</option>
-                        <option value="NP">NP (ناجح)</option>
-                        <option value="NF">NF (راسب)</option>
+                        <option value="NP" data-ar="NP (ناجح)" data-en="NP (Pass)">NP (ناجح)</option>
+                        <option value="NF" data-ar="NF (راسب)" data-en="NF (Fail)">NF (راسب)</option>
                     </select>
                 </div>
                 
                 <button class="add-btn" onclick="addCourse()">
-                    <i class="fas fa-plus"></i> إضافة المادة
+                    <i class="fas fa-plus"></i> <span data-ar="إضافة المادة" data-en="Add Course">إضافة المادة</span>
                 </button>
             </div>
         </div>
 
         <!-- قسم المواد المضافة -->
         <div class="card">
-            <h2><i class="fas fa-list"></i> المواد المضافة</h2>
+            <h2><i class="fas fa-list"></i> <span data-ar="المواد المضافة" data-en="Added Courses">المواد المضافة</span></h2>
             <div id="coursesList" class="courses-list">
                 <div class="empty-state">
                     <i class="fas fa-book-open"></i>
-                    <p>لم يتم إضافة أي مواد بعد</p>
+                    <p data-ar="لم يتم إضافة أي مواد بعد" data-en="No courses added yet">لم يتم إضافة أي مواد بعد</p>
                 </div>
             </div>
         </div>
 
         <!-- قسم النتائج -->
         <div class="card">
-            <h2><i class="fas fa-chart-line"></i> النتائج</h2>
+            <h2><i class="fas fa-chart-line"></i> <span data-ar="النتائج" data-en="Results">النتائج</span></h2>
             <div class="results-grid">
                 <div class="result-card">
-                    <h3>GPA الفصلي</h3>
+                    <h3 data-ar="GPA الفصلي" data-en="Semester GPA">GPA الفصلي</h3>
                     <div class="gpa-value" id="semesterGPA">0.00</div>
-                    <p>المعدل التراكمي للفصل الحالي</p>
+                    <p data-ar="المعدل التراكمي للفصل الحالي" data-en="Current semester GPA">المعدل التراكمي للفصل الحالي</p>
                 </div>
                 
                 <div class="result-card">
-                    <h3>إجمالي الساعات</h3>
+                    <h3 data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</h3>
                     <div class="gpa-value" id="totalHours">0</div>
-                    <p>الساعات المكتسبة</p>
+                    <p data-ar="الساعات المكتسبة" data-en="Credit hours earned">الساعات المكتسبة</p>
                 </div>
                 
                 <div class="result-card">
-                    <h3>إجمالي النقاط</h3>
+                    <h3 data-ar="إجمالي النقاط" data-en="Total Points">إجمالي النقاط</h3>
                     <div class="gpa-value" id="totalPoints">0.00</div>
-                    <p>مجموع النقاط</p>
+                    <p data-ar="مجموع النقاط" data-en="Total grade points">مجموع النقاط</p>
                 </div>
             </div>
             
             <div class="actions">
                 <button class="clear-btn" onclick="clearAll()">
-                    <i class="fas fa-trash"></i> مسح الكل
+                    <i class="fas fa-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span>
                 </button>
                 <button class="save-btn" onclick="saveResults()">
-                    <i class="fas fa-save"></i> حفظ النتائج
+                    <i class="fas fa-save"></i> <span data-ar="حفظ النتائج" data-en="Save Results">حفظ النتائج</span>
                 </button>
                 <button class="import-btn" onclick="document.getElementById('importFile').click()">
-                    <i class="fas fa-upload"></i> استيراد البيانات
+                    <i class="fas fa-upload"></i> <span data-ar="استيراد البيانات" data-en="Import Data">استيراد البيانات</span>
                 </button>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
             </div>
@@ -124,43 +132,53 @@
 
         <!-- قسم حساب GPA التراكمي -->
         <div class="cumulative-section">
-            <h2><i class="fas fa-chart-area"></i> حساب GPA التراكمي</h2>
+            <h2><i class="fas fa-chart-area"></i> <span data-ar="حساب GPA التراكمي" data-en="Cumulative GPA Calculation">حساب GPA التراكمي</span></h2>
             
             <div class="cumulative-input">
                 <div class="input-group">
-                    <label for="currentGPA">المعدل التراكمي الحالي:</label>
-                    <input type="number" id="currentGPA" placeholder="مثال: 11.50" step="0.01" min="0">
+                    <label for="currentGPA" data-ar="المعدل التراكمي الحالي:" data-en="Current Cumulative GPA:">المعدل التراكمي الحالي:</label>
+                    <input type="number" id="currentGPA" placeholder="مثال: 3.5" data-ar-placeholder="مثال: 3.5" data-en-placeholder="Example: 3.5" step="0.01" min="0" max="4" inputmode="decimal">
                 </div>
                 
                 <div class="input-group">
-                    <label for="currentHours">الساعات المكتسبة سابقاً:</label>
-                    <input type="number" id="currentHours" placeholder="مثال: 45" min="0">
+                    <label for="currentHours" data-ar="الساعات المكتسبة سابقاً:" data-en="Previously Earned Hours:">الساعات المكتسبة سابقاً:</label>
+                    <input type="number" id="currentHours" placeholder="مثال: 45" data-ar-placeholder="مثال: 45" data-en-placeholder="Example: 45" min="0">
                 </div>
                 
-                <button class="calculate-btn" onclick="calculateCumulative()">
-                    <i class="fas fa-calculator"></i> حساب المعدل التراكمي الجديد
-                </button>
+                <div class="calculation-buttons">
+                    <button class="auto-calculate-btn" onclick="autoCalculateGPA()">
+                        <i class="fas fa-magic"></i> <span data-ar="الحساب التلقائي" data-en="Auto Calculate">الحساب التلقائي</span>
+                    </button>
+                    <button class="manual-calculate-btn" onclick="manualCalculateGPA()">
+                        <i class="fas fa-edit"></i> <span data-ar="الحساب اليدوي" data-en="Manual Calculate">الحساب اليدوي</span>
+                    </button>
+                </div>
+                
+                <div class="english-hours-notice" id="englishNotice" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                    <span data-ar="تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي" data-en="Notice: 16 hours of English courses will be deducted from total hours as they don't count in cumulative GPA calculation">تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي</span>
+                </div>
             </div>
 
             <div class="cumulative-results" id="cumulativeResults" style="display: none;">
-                <h3>نتائج حساب GPA التراكمي</h3>
+                <h3 data-ar="نتائج حساب GPA التراكمي" data-en="Cumulative GPA Results">نتائج حساب GPA التراكمي</h3>
                 <div class="cumulative-grid">
                     <div class="cumulative-card">
-                        <h4>المعدل التراكمي الجديد</h4>
+                        <h4 data-ar="المعدل التراكمي الجديد" data-en="New Cumulative GPA">المعدل التراكمي الجديد</h4>
                         <div class="gpa-value" id="newCumulativeGPA">0.00</div>
-                        <p>المعدل بعد إضافة الفصل الحالي</p>
+                        <p data-ar="المعدل بعد إضافة الفصل الحالي" data-en="GPA after adding current semester">المعدل بعد إضافة الفصل الحالي</p>
                     </div>
                     
                     <div class="cumulative-card">
-                        <h4>إجمالي الساعات</h4>
+                        <h4 data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</h4>
                         <div class="gpa-value" id="totalCumulativeHours">0</div>
-                        <p>الساعات الإجمالية</p>
+                        <p data-ar="الساعات الإجمالية" data-en="Total credit hours">الساعات الإجمالية</p>
                     </div>
                     
                     <div class="cumulative-card">
-                        <h4>التغيير في المعدل</h4>
+                        <h4 data-ar="التغيير في المعدل" data-en="GPA Change">التغيير في المعدل</h4>
                         <div class="gpa-change" id="gpaChange">0.00</div>
-                        <p id="changeDescription">لا يوجد تغيير في المعدل</p>
+                        <p id="changeDescription" data-ar="لا يوجد تغيير في المعدل" data-en="No change in GPA">لا يوجد تغيير في المعدل</p>
                     </div>
                 </div>
             </div>
@@ -168,47 +186,47 @@
 
         <!-- قسم المعلومات -->
         <div class="info-section">
-            <h2><i class="fas fa-info-circle"></i> معلومات مهمة</h2>
+            <h2><i class="fas fa-info-circle"></i> <span data-ar="معلومات مهمة" data-en="Important Information">معلومات مهمة</span></h2>
             <div class="info-grid">
                 <div class="info-card">
-                    <h4>نظام الدرجات - 3 ساعات</h4>
+                    <h4 data-ar="نظام الدرجات - 3 ساعات" data-en="Grading System - 3 Hours">نظام الدرجات - 3 ساعات</h4>
                     <ul>
-                        <li>A+ = 12 نقطة</li>
-                        <li>A = 11.3 نقطة</li>
-                        <li>B+ = 10.5 نقطة</li>
-                        <li>B = 9 نقاط</li>
-                        <li>C+ = 7.5 نقطة</li>
-                        <li>C = 6 نقاط</li>
-                        <li>D+ = 4.5 نقطة</li>
-                        <li>D = 3 نقاط</li>
-                        <li>F = 0 نقطة</li>
-                        <li>NP = ناجح (لا يدخل في المعدل)</li>
-                        <li>NF = راسب (لا يدخل في المعدل)</li>
+                        <li data-ar="A+ = 12 نقطة" data-en="A+ = 12 points">A+ = 12 نقطة</li>
+                        <li data-ar="A = 11.3 نقطة" data-en="A = 11.3 points">A = 11.3 نقطة</li>
+                        <li data-ar="B+ = 10.5 نقطة" data-en="B+ = 10.5 points">B+ = 10.5 نقطة</li>
+                        <li data-ar="B = 9 نقاط" data-en="B = 9 points">B = 9 نقاط</li>
+                        <li data-ar="C+ = 7.5 نقطة" data-en="C+ = 7.5 points">C+ = 7.5 نقطة</li>
+                        <li data-ar="C = 6 نقاط" data-en="C = 6 points">C = 6 نقاط</li>
+                        <li data-ar="D+ = 4.5 نقطة" data-en="D+ = 4.5 points">D+ = 4.5 نقطة</li>
+                        <li data-ar="D = 3 نقاط" data-en="D = 3 points">D = 3 نقاط</li>
+                        <li data-ar="F = 0 نقطة" data-en="F = 0 points">F = 0 نقطة</li>
+                        <li data-ar="NP = ناجح (لا يدخل في المعدل)" data-en="NP = Pass (not counted in GPA)">NP = ناجح (لا يدخل في المعدل)</li>
+                        <li data-ar="NF = راسب (لا يدخل في المعدل)" data-en="NF = Fail (not counted in GPA)">NF = راسب (لا يدخل في المعدل)</li>
                     </ul>
                 </div>
                 <div class="info-card">
-                    <h4>نظام الدرجات - 2 ساعة</h4>
+                    <h4 data-ar="نظام الدرجات - 2 ساعة" data-en="Grading System - 2 Hours">نظام الدرجات - 2 ساعة</h4>
                     <ul>
-                        <li>A+ = 8 نقاط</li>
-                        <li>A = 7.5 نقطة</li>
-                        <li>B+ = 7 نقاط</li>
-                        <li>B = 6 نقاط</li>
-                        <li>C+ = 5 نقاط</li>
-                        <li>C = 4 نقاط</li>
-                        <li>D+ = 3 نقاط</li>
-                        <li>D = 2 نقطة</li>
-                        <li>F = 0 نقطة</li>
-                        <li>NP = ناجح (لا يدخل في المعدل)</li>
-                        <li>NF = راسب (لا يدخل في المعدل)</li>
+                        <li data-ar="A+ = 8 نقاط" data-en="A+ = 8 points">A+ = 8 نقاط</li>
+                        <li data-ar="A = 7.5 نقطة" data-en="A = 7.5 points">A = 7.5 نقطة</li>
+                        <li data-ar="B+ = 7 نقاط" data-en="B+ = 7 points">B+ = 7 نقاط</li>
+                        <li data-ar="B = 6 نقاط" data-en="B = 6 points">B = 6 نقاط</li>
+                        <li data-ar="C+ = 5 نقاط" data-en="C+ = 5 points">C+ = 5 نقاط</li>
+                        <li data-ar="C = 4 نقاط" data-en="C = 4 points">C = 4 نقاط</li>
+                        <li data-ar="D+ = 3 نقاط" data-en="D+ = 3 points">D+ = 3 نقاط</li>
+                        <li data-ar="D = 2 نقطة" data-en="D = 2 points">D = 2 نقطة</li>
+                        <li data-ar="F = 0 نقطة" data-en="F = 0 points">F = 0 نقطة</li>
+                        <li data-ar="NP = ناجح (لا يدخل في المعدل)" data-en="NP = Pass (not counted in GPA)">NP = ناجح (لا يدخل في المعدل)</li>
+                        <li data-ar="NF = راسب (لا يدخل في المعدل)" data-en="NF = Fail (not counted in GPA)">NF = راسب (لا يدخل في المعدل)</li>
                     </ul>
                 </div>
                 <div class="info-card">
-                    <h4>ملاحظات مهمة</h4>
+                    <h4 data-ar="ملاحظات مهمة" data-en="Important Notes">ملاحظات مهمة</h4>
                     <ul>
-                        <li>GPA = مجموع النقاط ÷ الساعات المكتسبة</li>
-                        <li>GPA التراكمي = (النقاط السابقة + نقاط الفصل الحالي) ÷ (الساعات السابقة + ساعات الفصل الحالي)</li>
-                        <li>المواد ذات درجات NP/NF لا تدخل في حساب المعدل</li>
-                        <li>جميع المواد الأخرى تدخل في حساب المعدل</li>
+                        <li data-ar="GPA = مجموع النقاط ÷ الساعات المكتسبة" data-en="GPA = Total Points ÷ Credit Hours Earned">GPA = مجموع النقاط ÷ الساعات المكتسبة</li>
+                        <li data-ar="GPA التراكمي = (النقاط السابقة + نقاط الفصل الحالي) ÷ (الساعات السابقة + ساعات الفصل الحالي)" data-en="Cumulative GPA = (Previous Points + Current Semester Points) ÷ (Previous Hours + Current Semester Hours)">GPA التراكمي = (النقاط السابقة + نقاط الفصل الحالي) ÷ (الساعات السابقة + ساعات الفصل الحالي)</li>
+                        <li data-ar="المواد ذات درجات NP/NF لا تدخل في حساب المعدل" data-en="Courses with NP/NF grades are not counted in GPA">المواد ذات درجات NP/NF لا تدخل في حساب المعدل</li>
+                        <li data-ar="جميع المواد الأخرى تدخل في حساب المعدل" data-en="All other courses are counted in GPA">جميع المواد الأخرى تدخل في حساب المعدل</li>
                     </ul>
                 </div>
             </div>
@@ -219,34 +237,34 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h3>حاسبة GPA</h3>
-                <p>موقع طلابي لتسهيل حساب المعدل التراكمي</p>
-                <p>من تطوير طلاب كلية الحوسبة والمعلوماتية</p>
+                <h3 data-ar="حاسبة GPA" data-en="GPA Calculator">حاسبة GPA</h3>
+                <p data-ar="موقع طلابي لتسهيل حساب المعدل التراكمي" data-en="Student website for easy GPA calculation">موقع طلابي لتسهيل حساب المعدل التراكمي</p>
+                <p data-ar="من تطوير طلاب كلية الحوسبة والمعلوماتية" data-en="Developed by students of Computing and Informatics College">من تطوير طلاب كلية الحوسبة والمعلوماتية</p>
             </div>
             
             <div class="footer-section">
-                <h3>روابط مهمة</h3>
+                <h3 data-ar="روابط مهمة" data-en="Important Links">روابط مهمة</h3>
                 <div class="footer-links">
                     <a href="https://t.me/Computing_and_Informatics" target="_blank" class="footer-link">
                         <i class="fab fa-telegram"></i>
-                        قروب كلية الحوسبة
+                        <span data-ar="قروب كلية الحوسبة" data-en="Computing College Group">قروب كلية الحوسبة</span>
                     </a>
                     <a href="https://t.me/archivesSEU" target="_blank" class="footer-link">
                         <i class="fas fa-archive"></i>
-                        قناة أرشيف الجامعة
+                        <span data-ar="قناة أرشيف الجامعة" data-en="University Archive Channel">قناة أرشيف الجامعة</span>
                     </a>
                 </div>
             </div>
             
             <div class="footer-section">
-                <h3>الجامعة السعودية الإلكترونية</h3>
+                <h3 data-ar="الجامعة السعودية الإلكترونية" data-en="Saudi Electronic University">الجامعة السعودية الإلكترونية</h3>
                 <p>SEU - Saudi Electronic University</p>
-                <p>كلية الحوسبة والمعلوماتية</p>
+                <p data-ar="كلية الحوسبة والمعلوماتية" data-en="College of Computing and Informatics">كلية الحوسبة والمعلوماتية</p>
             </div>
         </div>
         
         <div class="footer-bottom">
-            <p>&copy; 2024 حاسبة GPA - تطوير طلابي</p>
+            <p data-ar="&copy; 2024 حاسبة GPA - تطوير طلابي" data-en="&copy; 2024 GPA Calculator - Student Development">&copy; 2024 حاسبة GPA - تطوير طلابي</p>
         </div>
     </footer>
 
