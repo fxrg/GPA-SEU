@@ -378,7 +378,7 @@ body {
     flex-wrap: wrap;
 }
 
-.clear-btn, .save-btn {
+.clear-btn, .save-btn, .print-btn, .import-btn {
     padding: 0.8rem 1.5rem;
     border: none;
     border-radius: 8px;
@@ -411,6 +411,26 @@ body {
 .save-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(46, 213, 115, 0.3);
+}
+
+.print-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.print-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.import-btn {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.import-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(240, 147, 251, 0.3);
 }
 
 /* قسم GPA التراكمي */

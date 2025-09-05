@@ -28,6 +28,39 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // إضافة مستمع لحقل الساعات المكتسبة
+    const currentHoursInput = document.getElementById('currentHours');
+    if (currentHoursInput) {
+        // منع إدخال النصوص والرموز
+        currentHoursInput.addEventListener('input', function(e) {
+            // إزالة أي حروف أو رموز غير رقمية
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+        
+        // التحقق من صحة القيمة عند فقدان التركيز
+        currentHoursInput.addEventListener('blur', function(e) {
+            const value = parseInt(e.target.value);
+            if (!isNaN(value) && value >= 0) {
+                // تنسيق القيمة كرقم صحيح
+                e.target.value = value.toString();
+            } else if (e.target.value.trim() !== '') {
+                // إذا كان هناك قيمة غير صحيحة، مسحها
+                e.target.value = '';
+                showNotification(getTranslation('يرجى إدخال رقم صحيح للساعات المكتسبة', 'Please enter a valid number for earned hours'), 'warning');
+            }
+        });
+        
+        // منع لصق النصوص غير الرقمية
+        currentHoursInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const numericValue = paste.replace(/[^0-9]/g, '');
+            if (numericValue) {
+                e.target.value = numericValue;
+            }
+        });
+    }
 });
 
 // دوال الوضع المظلم
@@ -832,4 +865,408 @@ function updateGradeOptions() {
             courseGrade.appendChild(option);
         });
     }
+}
+
+// دالة طباعة PDF محسنة مع قالب جميل
+function printResultsPDF() {
+    if (!window.jspdf) {
+        showNotification(getTranslation('جاري تحميل مكتبة PDF...', 'Loading PDF library...'), 'info');
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = printResultsPDF;
+        document.head.appendChild(script);
+        return;
+    }
+    
+    const { jsPDF } = window.jspdf;
+    const isArabic = currentLanguage === 'ar';
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4'
+    });
+    
+    // ألوان القالب
+    const colors = {
+        primary: [30, 60, 114],
+        secondary: [102, 126, 234],
+        text: [51, 51, 51],
+        lightGray: [245, 245, 245],
+        darkGray: [128, 128, 128]
+    };
+    
+    let y = 20;
+    
+    // رأس التقرير مع شعار
+    doc.setFillColor(...colors.primary);
+    doc.rect(0, 0, 210, 35, 'F');
+    
+    // شعار الجامعة (دائرة مع أيقونة)
+    doc.setFillColor(255, 255, 255);
+    doc.circle(25, 17.5, 8, 'F');
+    doc.setFontSize(16);
+    doc.setTextColor(...colors.primary);
+    doc.text('🎓', 21, 21);
+    
+    // عنوان الجامعة
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.text(isArabic ? 'الجامعة السعودية الإلكترونية' : 'Saudi Electronic University', isArabic ? 180 : 40, 15, { align: isArabic ? 'right' : 'left' });
+    doc.setFontSize(12);
+    doc.text(isArabic ? 'كلية الحوسبة والمعلوماتية' : 'College of Computing and Informatics', isArabic ? 180 : 40, 25, { align: isArabic ? 'right' : 'left' });
+    
+    y = 50;
+    
+    // عنوان التقرير
+    doc.setTextColor(...colors.text);
+    doc.setFontSize(20);
+    const reportTitle = isArabic ? 'تقرير المعدل التراكمي' : 'GPA Report';
+    doc.text(reportTitle, 105, y, { align: 'center' });
+    y += 15;
+    
+    // تاريخ الطباعة
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.darkGray);
+    const dateLabel = isArabic ? 'تاريخ الطباعة: ' : 'Print Date: ';
+    const date = new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US');
+    doc.text(dateLabel + date, 105, y, { align: 'center' });
+    y += 20;
+    
+    // خط فاصل
+    doc.setDrawColor(...colors.secondary);
+    doc.setLineWidth(0.5);
+    doc.line(20, y, 190, y);
+    y += 10;
+    
+    // المعدل الفصلي - بطاقة كبيرة
+    doc.setFillColor(...colors.lightGray);
+    doc.roundedRect(20, y, 170, 25, 3, 3, 'F');
+    
+    doc.setFontSize(14);
+    doc.setTextColor(...colors.primary);
+    const semesterGPALabel = isArabic ? 'المعدل الفصلي (GPA)' : 'Semester GPA';
+    doc.text(semesterGPALabel, 105, y + 8, { align: 'center' });
+    
+    doc.setFontSize(24);
+    doc.setTextColor(...colors.secondary);
+    const semesterGPA = document.getElementById('semesterGPA').textContent;
+    doc.text(semesterGPA, 105, y + 20, { align: 'center' });
+    
+    y += 35;
+    
+    // إحصائيات سريعة - 4 أعمدة مع المعدل التراكمي
+    const totalHours = document.getElementById('totalHours').textContent;
+    const totalPoints = document.getElementById('totalPoints').textContent;
+    
+    // الحصول على المعدل التراكمي
+    const cumulativeResultsEl = document.getElementById('cumulativeResults');
+    const currentGPAInputEl = document.getElementById('currentGPA');
+    let cumulativeGPADisplay = 'غير محسوب';
+    
+    if (cumulativeResultsEl && cumulativeResultsEl.style.display !== 'none') {
+        cumulativeGPADisplay = document.getElementById('newCumulativeGPA').textContent;
+    } else if (currentGPAInputEl && currentGPAInputEl.value) {
+        cumulativeGPADisplay = currentGPAInputEl.value;
+    }
+    
+    if (currentLanguage === 'en') {
+        cumulativeGPADisplay = cumulativeGPADisplay === 'غير محسوب' ? 'Not Calculated' : cumulativeGPADisplay;
+    }
+    
+    const statsData = [
+        { 
+            title: isArabic ? 'إجمالي الساعات' : 'Total Hours', 
+            value: totalHours,
+            icon: '⏰'
+        },
+        { 
+            title: isArabic ? 'إجمالي النقاط' : 'Total Points', 
+            value: totalPoints,
+            icon: '📊'
+        },
+        { 
+            title: isArabic ? 'عدد المواد' : 'Total Courses', 
+            value: courses.length.toString(),
+            icon: '📚'
+        },
+        { 
+            title: isArabic ? 'المعدل التراكمي' : 'Cumulative GPA', 
+            value: cumulativeGPADisplay,
+            icon: '🎯'
+        }
+    ];
+    
+    // رسم البطاقات الأربع
+    const cardWidth = 40;
+    const cardSpacing = 42.5;
+    const startX = 20;
+    
+    for (let i = 0; i < 4; i++) {
+        const x = startX + (i * cardSpacing);
+        
+        // إطار البطاقة
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...colors.secondary);
+        doc.roundedRect(x, y, cardWidth, 30, 2, 2, 'FD');
+        
+        // الأيقونة
+        doc.setFontSize(12);
+        doc.text(statsData[i].icon, x + cardWidth/2, y + 8, { align: 'center' });
+        
+        // القيمة
+        doc.setFontSize(14);
+        doc.setTextColor(...colors.primary);
+        const displayValue = statsData[i].value.length > 8 ? statsData[i].value.substring(0, 6) + '...' : statsData[i].value;
+        doc.text(displayValue, x + cardWidth/2, y + 16, { align: 'center' });
+        
+        // العنوان
+        doc.setFontSize(7);
+        doc.setTextColor(...colors.darkGray);
+        doc.text(statsData[i].title, x + cardWidth/2, y + 25, { align: 'center' });
+    }
+    
+    y += 45;
+    
+    // قسم المواد
+    if (courses.length > 0) {
+        // عنوان جدول المواد
+        doc.setFontSize(14);
+        doc.setTextColor(...colors.primary);
+        const coursesTitle = isArabic ? 'تفاصيل المواد' : 'Course Details';
+        doc.text(coursesTitle, isArabic ? 190 : 20, y, { align: isArabic ? 'right' : 'left' });
+        y += 10;
+        
+        // رأس الجدول
+        doc.setFillColor(...colors.primary);
+        doc.rect(20, y, 170, 8, 'F');
+        
+        doc.setFontSize(9);
+        doc.setTextColor(255, 255, 255);
+        
+        const headers = isArabic ? 
+            ['اسم المادة', 'الساعات', 'الدرجة', 'النقاط'] : 
+            ['Course Name', 'Hours', 'Grade', 'Points'];
+        
+        const colWidths = [80, 25, 35, 30];
+        let colX = isArabic ? 190 : 20;
+        
+        headers.forEach((header, i) => {
+            if (isArabic) {
+                doc.text(header, colX, y + 5, { align: 'right' });
+                colX -= colWidths[i];
+            } else {
+                doc.text(header, colX + 2, y + 5);
+                colX += colWidths[i];
+            }
+        });
+        
+        y += 8;
+        
+        // بيانات المواد
+        doc.setTextColor(...colors.text);
+        doc.setFontSize(8);
+        
+        courses.forEach((course, index) => {
+            // تناوب ألوان الصفوف
+            if (index % 2 === 0) {
+                doc.setFillColor(...colors.lightGray);
+                doc.rect(20, y, 170, 7, 'F');
+            }
+            
+            const rowData = [
+                course.name,
+                course.hours.toString(),
+                getGradeText(course.grade),
+                course.grade === 'NP' || course.grade === 'NF' ? '--' : course.points.toFixed(1)
+            ];
+            
+            colX = isArabic ? 190 : 20;
+            
+            rowData.forEach((data, i) => {
+                if (isArabic) {
+                    doc.text(data, colX, y + 5, { align: 'right' });
+                    colX -= colWidths[i];
+                } else {
+                    doc.text(data, colX + 2, y + 5);
+                    colX += colWidths[i];
+                }
+            });
+            
+            y += 7;
+            
+            // صفحة جديدة إذا امتلأت الصفحة
+            if (y > 260) {
+                doc.addPage();
+                y = 20;
+            }
+        });
+        
+        y += 10;
+    }
+    
+    // المعدل التراكمي - قسم محسن
+    if (y > 220) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    // خط فاصل
+    doc.setDrawColor(...colors.secondary);
+    doc.line(20, y, 190, y);
+    y += 15;
+    
+    // عنوان قسم المعدل التراكمي
+    doc.setFontSize(16);
+    doc.setTextColor(...colors.primary);
+    const cumulativeTitle = isArabic ? 'المعدل التراكمي' : 'Cumulative GPA';
+    doc.text(cumulativeTitle, 105, y, { align: 'center' });
+    y += 15;
+    
+    const cumulativeResultsSection = document.getElementById('cumulativeResults');
+    const currentGPAField = document.getElementById('currentGPA');
+    const currentHoursField = document.getElementById('currentHours');
+    
+    if (cumulativeResultsSection && cumulativeResultsSection.style.display !== 'none') {
+        // المعدل التراكمي محسوب - عرض النتائج المفصلة
+        
+        // بطاقة المعدل التراكمي الجديد
+        doc.setFillColor(...colors.secondary);
+        doc.roundedRect(20, y, 170, 20, 3, 3, 'F');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(255, 255, 255);
+        const newCumulativeLabel = isArabic ? 'المعدل التراكمي الجديد' : 'New Cumulative GPA';
+        doc.text(newCumulativeLabel, 105, y + 7, { align: 'center' });
+        
+        doc.setFontSize(18);
+        const newCumulativeGPA = document.getElementById('newCumulativeGPA').textContent;
+        doc.text(newCumulativeGPA, 105, y + 16, { align: 'center' });
+        
+        y += 30;
+        
+        // تفاصيل المعدل التراكمي في جدول منسق
+        const cumulativeData = [
+            { 
+                label: isArabic ? 'المعدل التراكمي السابق:' : 'Previous Cumulative GPA:', 
+                value: currentGPAField.value || '0.00'
+            },
+            { 
+                label: isArabic ? 'الساعات السابقة:' : 'Previous Hours:', 
+                value: currentHoursField.value || '0'
+            },
+            { 
+                label: isArabic ? 'الساعات الجديدة:' : 'New Hours:', 
+                value: totalHours
+            },
+            { 
+                label: isArabic ? 'إجمالي الساعات:' : 'Total Hours:', 
+                value: document.getElementById('totalCumulativeHours').textContent
+            },
+            { 
+                label: isArabic ? 'التغيير في المعدل:' : 'GPA Change:', 
+                value: document.getElementById('gpaChange').textContent
+            }
+        ];
+        
+        // رسم جدول التفاصيل
+        doc.setFillColor(...colors.lightGray);
+        doc.rect(20, y, 170, 5 * 8, 'F');
+        
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.text);
+        
+        cumulativeData.forEach((item, index) => {
+            const rowY = y + 5 + (index * 8);
+            
+            // تناوب ألوان الصفوف
+            if (index % 2 === 1) {
+                doc.setFillColor(255, 255, 255);
+                doc.rect(20, rowY - 2, 170, 8, 'F');
+            }
+            
+            doc.setTextColor(...colors.text);
+            doc.text(item.label, isArabic ? 185 : 25, rowY + 3, { align: isArabic ? 'right' : 'left' });
+            
+            doc.setTextColor(...colors.secondary);
+            doc.setFontSize(11);
+            doc.text(item.value, isArabic ? 90 : 125, rowY + 3, { align: isArabic ? 'right' : 'left' });
+            doc.setFontSize(10);
+        });
+        
+        y += 50;
+        
+    } else if (currentGPAField.value || currentHoursField.value) {
+        // توجد بيانات المعدل التراكمي لكن لم يتم الحساب
+        
+        doc.setFillColor(...colors.lightGray);
+        doc.roundedRect(20, y, 170, 25, 3, 3, 'F');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(...colors.primary);
+        const statusText = isArabic ? 'بيانات المعدل التراكمي المتاحة' : 'Available Cumulative GPA Data';
+        doc.text(statusText, 105, y + 8, { align: 'center' });
+        
+        const currentData = [
+            `${isArabic ? 'المعدل الحالي:' : 'Current GPA:'} ${currentGPAField.value || 'غير محدد'}`,
+            `${isArabic ? 'الساعات الحالية:' : 'Current Hours:'} ${currentHoursField.value || 'غير محدد'}`
+        ];
+        
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.darkGray);
+        currentData.forEach((text, index) => {
+            doc.text(text, 105, y + 16 + (index * 5), { align: 'center' });
+        });
+        
+        y += 35;
+        
+        // رسالة تحفيزية
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.secondary);
+        const encourageText = isArabic ? 
+            'استخدم زر "الحساب التلقائي" لحساب المعدل التراكمي الجديد' :
+            'Use "Auto Calculate" button to compute new cumulative GPA';
+        doc.text(encourageText, 105, y, { align: 'center' });
+        y += 10;
+        
+    } else {
+        // لا توجد بيانات للمعدل التراكمي
+        
+        doc.setFillColor(...colors.lightGray);
+        doc.roundedRect(20, y, 170, 20, 3, 3, 'F');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(...colors.darkGray);
+        const noDataText = isArabic ? 'لم يتم إدخال بيانات المعدل التراكمي' : 'No Cumulative GPA Data Entered';
+        doc.text(noDataText, 105, y + 10, { align: 'center' });
+        
+        y += 30;
+    }
+    
+    // تذييل الصفحة
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        
+        // خط التذييل
+        doc.setDrawColor(...colors.lightGray);
+        doc.line(20, 280, 190, 280);
+        
+        // نص التذييل
+        doc.setFontSize(8);
+        doc.setTextColor(...colors.darkGray);
+        const footerText = isArabic ? 
+            'تم إنشاء هذا التقرير بواسطة حاسبة GPA - الجامعة السعودية الإلكترونية' :
+            'Generated by GPA Calculator - Saudi Electronic University';
+        doc.text(footerText, 105, 285, { align: 'center' });
+        
+        // رقم الصفحة
+        const pageText = isArabic ? `صفحة ${i} من ${pageCount}` : `Page ${i} of ${pageCount}`;
+        doc.text(pageText, isArabic ? 25 : 185, 290, { align: isArabic ? 'left' : 'right' });
+    }
+    
+    // حفظ الملف
+    const fileName = `SEU_GPA_Report_${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+    
+    showNotification(getTranslation('تم إنشاء ملف PDF بنجاح', 'PDF file generated successfully'), 'success');
 } 
