@@ -3,6 +3,90 @@ let courses = [];
 let courseId = 1;
 let currentLanguage = 'ar';
 let currentTheme = 'light';
+let editingCourseId = null;
+
+// Edit course: load into form and switch add button to save mode
+function startEditCourse(id) {
+    const course = courses.find(c => c.id === id);
+    if (!course) return;
+    editingCourseId = id;
+
+    const nameInput = document.getElementById('courseName');
+    const hoursSelect = document.getElementById('courseHours');
+    const gradeSelect = document.getElementById('courseGrade');
+
+    if (nameInput) nameInput.value = course.name || '';
+    if (hoursSelect) hoursSelect.value = String(course.hours);
+    if (typeof updateGradeOptions === 'function') { updateGradeOptions(); }
+    if (gradeSelect) gradeSelect.value = String(course.grade);
+
+    const btn = document.querySelector('.add-btn');
+    if (btn) {
+        const icon = btn.querySelector('i');
+        const labelSpan = btn.querySelector('span');
+        if (icon) icon.className = 'fas fa-save';
+        const ar = 'حفظ التعديلات';
+        const en = 'Save Changes';
+        if (labelSpan) {
+            labelSpan.setAttribute('data-ar', ar);
+            labelSpan.setAttribute('data-en', en);
+            labelSpan.textContent = getTranslation(ar, en);
+        } else {
+            btn.textContent = getTranslation(ar, en);
+        }
+        btn.setAttribute('onclick', 'saveEditedCourse()');
+    }
+}
+
+// Save edited values back to array and recalc
+function saveEditedCourse() {
+    if (editingCourseId == null) return;
+
+    const nameInput = document.getElementById('courseName');
+    const hoursSelect = document.getElementById('courseHours');
+    const gradeSelect = document.getElementById('courseGrade');
+
+    let courseName = nameInput && typeof nameInput.value === 'string' ? nameInput.value.trim() : '';
+    const courseHours = parseInt(hoursSelect && hoursSelect.value ? hoursSelect.value : '0');
+    const courseGrade = gradeSelect && gradeSelect.value ? gradeSelect.value : '0';
+
+    if (!courseName) {
+        courseName = getTranslation('بدون اسم', 'Unnamed Course');
+    }
+
+    const idx = courses.findIndex(c => c.id === editingCourseId);
+    if (idx === -1) return;
+
+    courses[idx].name = courseName;
+    courses[idx].hours = courseHours;
+    courses[idx].grade = courseGrade;
+    courses[idx].points = calculatePoints(courseGrade, courseHours);
+
+    updateCoursesList();
+    updateResults();
+    saveToLocalStorage();
+
+    // reset form and button
+    clearInputs();
+    const btn = document.querySelector('.add-btn');
+    if (btn) {
+        const icon = btn.querySelector('i');
+        const labelSpan = btn.querySelector('span');
+        if (icon) icon.className = 'fas fa-plus';
+        const arAdd = 'إضافة مقرر';
+        const enAdd = 'Add Course';
+        if (labelSpan) {
+            labelSpan.setAttribute('data-ar', arAdd);
+            labelSpan.setAttribute('data-en', enAdd);
+            labelSpan.textContent = getTranslation(arAdd, enAdd);
+        } else {
+            btn.textContent = getTranslation(arAdd, enAdd);
+        }
+        btn.setAttribute('onclick', 'addCourse()');
+    }
+    editingCourseId = null;
+    showNotification(getTranslation('تم تحديث المقرر بنجاح', 'Course updated successfully'), 'success');
+}
 
 // تهيئة التطبيق
 document.addEventListener('DOMContentLoaded', function() {
@@ -245,6 +329,24 @@ function updateCoursesList() {
             </button>
         </div>
     `).join('');
+
+    // Inject edit buttons next to delete buttons
+    const items = Array.from(coursesList.querySelectorAll('.course-item'));
+    items.forEach((item, idx) => {
+        const delBtn = item.querySelector('.delete-btn');
+        if (!delBtn) return;
+        // Avoid duplicating if actions already exist
+        if (item.querySelector('.course-actions')) return;
+        const actions = document.createElement('div');
+        actions.className = 'course-actions';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn';
+        editBtn.innerHTML = `<i class="fas fa-pen"></i> ${getTranslation('تعديل', 'Edit')}`;
+        editBtn.addEventListener('click', () => startEditCourse(courses[idx].id));
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+        item.appendChild(actions);
+    });
 }
 
 // تحديث النتائج

@@ -1375,3 +1375,26 @@ body {
          border: 1px solid var(--border-color);
      }
  } 
+.course-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-btn {
+    background: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.edit-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(91, 134, 229, 0.35);
+}
