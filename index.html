@@ -1,12 +1,10 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html dir="rtl" lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1e3c72">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <title>حاسبة GPA - الجامعة السعودية الإلكترونية</title>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="theme-color" content="#25428F">
+    <title>حاسبة المعدل التراكمي - SEU GPA Calculator</title>
     <meta name="description" content="حاسبة المعدل التراكمي (GPA) للطلاب في الجامعة السعودية الإلكترونية. احسب المعدل الفصلي والتراكمي بسهولة مع دعم العربية والإنجليزية.">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -20,10 +18,15 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="حاسبة المعدل التراكمي GPA - الجامعة السعودية الإلكترونية">
     <meta name="twitter:description" content="احسب المعدل الفصلي والتراكمي بسهولة لطلاب الجامعة السعودية الإلكترونية.">
-    <link rel="stylesheet" href="styles.css">
+    
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -34,267 +37,716 @@
       "url": "https://example.com/"
     }
     </script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#25428F",
+                        secondary: "#5E7ED2",
+                        "background-light": "#F8FAFC",
+                        "background-dark": "#0F172A",
+                        accent: "#F59E0B",
+                    },
+                    fontFamily: {
+                        display: ["IBM Plex Sans Arabic", "sans-serif"],
+                        body: ["IBM Plex Sans Arabic", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        'xl': "16px",
+                        '2xl': "24px",
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #25428F 0%, #1e3a8a 100%);
+        }
+        /* Course Items */
+        .course-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+        .dark .course-item {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        .course-item:hover {
+            transform: translateX(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .course-info {
+            flex: 1;
+        }
+        .course-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+        .dark .course-name {
+            color: #f1f5f9;
+        }
+        .course-details {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .course-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .delete-btn, .edit-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .delete-btn {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .delete-btn:hover {
+            background: #fecaca;
+        }
+        .edit-btn {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .edit-btn:hover {
+            background: #bfdbfe;
+        }
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #94a3b8;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        /* Cumulative Results */
+        #cumulativeResults {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #25428F 0%, #1e3a8a 100%);
+            border-radius: 16px;
+            color: white;
+        }
+        #cumulativeResults h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .cumulative-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 768px) {
+            .cumulative-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .cumulative-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .cumulative-card h4 {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+        .cumulative-card .gpa-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .cumulative-card p {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+        }
+        .gpa-change {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        .gpa-change.positive { color: #4ade80; }
+        .gpa-change.negative { color: #f87171; }
+        .gpa-change.neutral { color: #fbbf24; }
+        /* English Notice */
+        .english-hours-notice {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #fef3c7;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #92400e;
+            font-size: 0.875rem;
+        }
+        .dark .english-hours-notice {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 5.5rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .notification.success {
+            background: #10b981;
+            color: white;
+        }
+        .notification.error {
+            background: #ef4444;
+            color: white;
+        }
+        .notification.warning {
+            background: #f59e0b;
+            color: white;
+        }
+        /* Scenario Cards */
+        .scenario-card {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid;
+        }
+        .scenario-emerald { background: #ecfdf5; border-color: #a7f3d0; }
+        .scenario-emerald .grade { color: #059669; }
+        .scenario-green { background: #f0fdf4; border-color: #bbf7d0; }
+        .scenario-green .grade { color: #16a34a; }
+        .scenario-teal { background: #f0fdfa; border-color: #99f6e4; }
+        .scenario-teal .grade { color: #0d9488; }
+        .scenario-cyan { background: #ecfeff; border-color: #a5f3fc; }
+        .scenario-cyan .grade { color: #0891b2; }
+        .scenario-sky { background: #f0f9ff; border-color: #bae6fd; }
+        .scenario-sky .grade { color: #0284c7; }
+        .scenario-blue { background: #eff6ff; border-color: #bfdbfe; }
+        .scenario-blue .grade { color: #2563eb; }
+        .scenario-purple { background: #faf5ff; border-color: #e9d5ff; }
+        .scenario-purple .grade { color: #9333ea; }
+        .dark .scenario-emerald { background: rgba(5, 150, 105, 0.1); border-color: rgba(167, 243, 208, 0.3); }
+        .dark .scenario-green { background: rgba(22, 163, 74, 0.1); border-color: rgba(187, 247, 208, 0.3); }
+        .dark .scenario-teal { background: rgba(13, 148, 136, 0.1); border-color: rgba(153, 246, 228, 0.3); }
+        .dark .scenario-cyan { background: rgba(8, 145, 178, 0.1); border-color: rgba(165, 243, 252, 0.3); }
+        .dark .scenario-sky { background: rgba(2, 132, 199, 0.1); border-color: rgba(186, 230, 253, 0.3); }
+        .dark .scenario-blue { background: rgba(37, 99, 235, 0.1); border-color: rgba(191, 219, 254, 0.3); }
+        .dark .scenario-purple { background: rgba(147, 51, 234, 0.1); border-color: rgba(233, 213, 255, 0.3); }
+    </style>
 </head>
-<body>
-    <!-- الهيدر -->
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-graduation-cap"></i>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-100 transition-colors duration-300">
+
+<!-- Navbar -->
+<nav class="sticky top-0 z-50 glass-card border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <div class="flex items-center gap-4">
+                <div class="bg-primary p-2 rounded-xl">
+                    <span class="material-icons-round text-white text-3xl">school</span>
                 </div>
-                <div class="logo-text">
-                    <h1>الجامعة السعودية الإلكترونية</h1>
-                    <p>Saudi Electronic University</p>
+                <div>
+                    <h1 class="text-xl font-bold text-primary dark:text-white leading-none" data-ar="الجامعة السعودية الإلكترونية" data-en="Saudi Electronic University">الجامعة السعودية الإلكترونية</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Saudi Electronic University</p>
                 </div>
             </div>
-                         <div class="header-info">
-                 <h2 data-ar="حاسبة المعدل التراكمي GPA" data-en="GPA Calculator">حاسبة المعدل التراكمي GPA</h2>
-                 <p data-ar="نظام حساب المعدل التراكمي للطلاب" data-en="Student GPA Calculation System">نظام حساب المعدل التراكمي للطلاب</p>
-             </div>
-             <div class="header-controls">
-                 <button class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع المظلم">
-                     <i class="fas fa-moon"></i>
-                 </button>
-                 <button class="language-toggle" onclick="toggleLanguage()" title="تغيير اللغة">
-                     <i class="fas fa-language"></i>
-                 </button>
-             </div>
+            <div class="flex items-center gap-3">
+                <button class="theme-toggle p-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-slate-600 dark:text-slate-300" onclick="toggleTheme()" title="تبديل الوضع المظلم" aria-label="Toggle dark mode">
+                    <span class="material-icons-round">dark_mode</span>
+                </button>
+                <button class="language-toggle flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-full font-medium shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all" onclick="toggleLanguage()" title="تغيير اللغة" aria-label="Change language">
+                    <span class="material-icons-round text-lg">language</span>
+                    <span data-ar="English" data-en="العربية">English</span>
+                </button>
+            </div>
         </div>
-    </header>
+    </div>
+</nav>
 
-    <!-- المحتوى الرئيسي -->
-    <div class="container">
-        <!-- قسم إضافة المواد -->
-        <div class="card">
-                         <h2><i class="fas fa-plus-circle"></i> <span data-ar="إضافة مادة جديدة" data-en="Add New Course">إضافة مادة جديدة</span></h2>
+<!-- Hero Section -->
+<header class="relative overflow-hidden pt-16 pb-24 lg:pt-24 lg:pb-32 hero-gradient">
+    <div class="absolute inset-0 opacity-10">
+        <svg class="h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <defs><pattern height="10" id="grid" patternUnits="userSpaceOnUse" width="10"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5"></path></pattern></defs>
+            <rect fill="url(#grid)" height="100" width="100"></rect>
+        </svg>
+    </div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center">
+        <h2 class="text-4xl lg:text-6xl font-extrabold text-white mb-6 leading-tight" data-ar="حاسبة المعدل التراكمي GPA" data-en="GPA Calculator">
+            حاسبة المعدل التراكمي GPA
+        </h2>
+        <p class="text-lg lg:text-xl text-blue-100 max-w-2xl mx-auto mb-10 leading-relaxed font-light" data-ar="نظام متطور مصمم خصيصاً لطلاب الجامعة السعودية الإلكترونية لحساب المعدل الفصلي والتراكمي بدقة متناهية وفقاً للوائح الأكاديمية." data-en="An advanced system designed specifically for Saudi Electronic University students to calculate semester and cumulative GPA with high precision according to academic regulations.">
+            نظام متطور مصمم خصيصاً لطلاب الجامعة السعودية الإلكترونية لحساب المعدل الفصلي والتراكمي بدقة متناهية وفقاً للوائح الأكاديمية.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+            <a class="px-8 py-4 bg-white text-primary rounded-full font-bold text-lg hover:bg-blue-50 transition-all flex items-center gap-2" href="#calculator">
+                <span class="material-icons-round">calculate</span>
+                <span data-ar="ابدأ الحساب الآن" data-en="Start Calculating">ابدأ الحساب الآن</span>
+            </a>
+            <a href="#info-section" class="px-8 py-4 border-2 border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all flex items-center gap-2">
+                <span class="material-icons-round">info</span>
+                <span data-ar="شرح نظام الدرجات" data-en="Grading System Info">شرح نظام الدرجات</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-10 pb-20">
+    <!-- Calculator Section -->
+    <section class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800" id="calculator">
+        
+        <!-- Add Course Form -->
+        <div class="p-8 border-b border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="material-icons-round text-primary dark:text-secondary text-3xl">add_circle</span>
+                <h3 class="text-2xl font-bold" data-ar="إضافة مادة جديدة" data-en="Add New Course">إضافة مادة جديدة</h3>
+            </div>
             
-            <div class="add-course-form">
-                <div class="input-group">
-                    <label for="courseName" data-ar="اسم المادة (اختياري):" data-en="Course Name (Optional):">اسم المادة (اختياري):</label>
-                    <input type="text" id="courseName" placeholder="مثال: الرياضيات 251" data-ar-placeholder="مثال: الرياضيات 251" data-en-placeholder="Example: Math 251">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-end">
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-400" for="courseName" data-ar="اسم المادة (اختياري)" data-en="Course Name (Optional)">اسم المادة (اختياري)</label>
+                    <input class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary py-3 px-4" id="courseName" placeholder="مثال: الرياضيات 251" data-ar-placeholder="مثال: الرياضيات 251" data-en-placeholder="Example: Math 251" type="text"/>
                 </div>
-                
-                <div class="input-group">
-                    <label for="courseHours" data-ar="عدد الساعات:" data-en="Credit Hours:">عدد الساعات:</label>
-                    <select id="courseHours">
-                        <option value="3" data-ar="3 ساعات" data-en="3 Hours">3 ساعات</option>
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-400" for="courseHours" data-ar="عدد الساعات" data-en="Credit Hours">عدد الساعات</label>
+                    <select class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary py-3 px-4" id="courseHours">
+                        <option value="3" data-ar="3 ساعات" data-en="3 Hours" selected>3 ساعات</option>
                         <option value="2" data-ar="2 ساعات" data-en="2 Hours">2 ساعات</option>
                     </select>
                 </div>
-                
-                <div class="input-group">
-                    <label for="courseGrade" data-ar="الدرجة:" data-en="Grade:">الدرجة:</label>
-                    <select id="courseGrade">
-                        <option value="12">A+ (12)</option>
-                        <option value="11.3">A (11.3)</option>
-                        <option value="10.5">B+ (10.5)</option>
-                        <option value="9">B (9)</option>
-                        <option value="7.5">C+ (7.5)</option>
-                        <option value="6">C (6)</option>
-                        <option value="4.5">D+ (4.5)</option>
-                        <option value="3">D (3)</option>
-                        <option value="0">F (0)</option>
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-slate-600 dark:text-slate-400" for="courseGrade" data-ar="الدرجة" data-en="Grade">الدرجة</label>
+                    <select class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-primary focus:border-primary py-3 px-4" id="courseGrade">
+                        <option value="12">A+ (4.0)</option>
+                        <option value="11.3">A (3.75)</option>
+                        <option value="10.5">B+ (3.5)</option>
+                        <option value="9">B (3.0)</option>
+                        <option value="7.5">C+ (2.5)</option>
+                        <option value="6">C (2.0)</option>
+                        <option value="4.5">D+ (1.5)</option>
+                        <option value="3">D (1.0)</option>
+                        <option value="0">F (0.0)</option>
                         <option value="NP" data-ar="NP (ناجح)" data-en="NP (Pass)">NP (ناجح)</option>
                         <option value="NF" data-ar="NF (راسب)" data-en="NF (Fail)">NF (راسب)</option>
                     </select>
                 </div>
-                
-                <button class="add-btn" onclick="addCourse()">
-                    <i class="fas fa-plus"></i> <span data-ar="إضافة المادة" data-en="Add Course">إضافة المادة</span>
+                <button class="add-btn bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-xl transition-all flex items-center justify-center gap-2 h-[46px]" onclick="addCourse()">
+                    <i class="fas fa-plus"></i>
+                    <span data-ar="إضافة المادة" data-en="Add Course">إضافة المادة</span>
                 </button>
             </div>
         </div>
 
-        <!-- قسم المواد المضافة -->
-        <div class="card">
-            <h2><i class="fas fa-list"></i> <span data-ar="المواد المضافة" data-en="Added Courses">المواد المضافة</span></h2>
-            <div id="coursesList" class="courses-list">
-                <div class="empty-state">
-                    <i class="fas fa-book-open"></i>
-                    <p data-ar="لم يتم إضافة أي مواد بعد" data-en="No courses added yet">لم يتم إضافة أي مواد بعد</p>
-                </div>
+        <!-- Courses List -->
+        <div class="p-8 bg-slate-50 dark:bg-slate-900/50 min-h-[200px]" id="coursesList">
+            <div class="empty-state">
+                <span class="material-icons-round text-slate-300 dark:text-slate-600" style="font-size: 4rem;">auto_stories</span>
+                <h4 class="text-xl font-semibold text-slate-500 dark:text-slate-400 mt-4" data-ar="لا توجد مواد مضافة بعد" data-en="No courses added yet">لا توجد مواد مضافة بعد</h4>
+                <p class="text-slate-400 mt-2" data-ar="ابدأ بإضافة المواد الدراسية أعلاه لحساب المعدل" data-en="Start adding courses above to calculate GPA">ابدأ بإضافة المواد الدراسية أعلاه لحساب المعدل</p>
             </div>
         </div>
 
-        <!-- قسم النتائج -->
-        <div class="card">
-            <h2><i class="fas fa-chart-line"></i> <span data-ar="النتائج" data-en="Results">النتائج</span></h2>
-            <div class="results-grid">
-                <div class="result-card">
-                    <h3 data-ar="GPA الفصلي" data-en="Semester GPA">GPA الفصلي</h3>
-                    <div class="gpa-value" id="semesterGPA">0.00</div>
-                    <p data-ar="المعدل التراكمي للفصل الحالي" data-en="Current semester GPA">المعدل التراكمي للفصل الحالي</p>
+        <!-- Results Section -->
+        <div class="p-8 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+            <div class="flex items-center gap-3 mb-8">
+                <span class="material-icons-round text-primary dark:text-secondary text-3xl">insights</span>
+                <h3 class="text-2xl font-bold" data-ar="النتائج المتوقعة" data-en="Expected Results">النتائج المتوقعة</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <div class="p-8 rounded-3xl bg-primary text-white text-center shadow-xl shadow-primary/20">
+                    <p class="text-sm font-medium opacity-80 mb-2" data-ar="GPA الفصلي" data-en="Semester GPA">GPA الفصلي</p>
+                    <div class="text-5xl font-bold mb-2" id="semesterGPA">0.00</div>
+                    <p class="text-xs opacity-70" data-ar="المعدل التراكمي للفصل الحالي" data-en="Current semester GPA">المعدل التراكمي للفصل الحالي</p>
                 </div>
-                
-                <div class="result-card">
-                    <h3 data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</h3>
-                    <div class="gpa-value" id="totalHours">0</div>
-                    <p data-ar="الساعات المكتسبة" data-en="Credit hours earned">الساعات المكتسبة</p>
+                <div class="p-8 rounded-3xl bg-secondary text-white text-center shadow-xl shadow-secondary/20">
+                    <p class="text-sm font-medium opacity-80 mb-2" data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</p>
+                    <div class="text-5xl font-bold mb-2" id="totalHours">0</div>
+                    <p class="text-xs opacity-70" data-ar="الساعات المكتسبة للفصل" data-en="Semester credit hours">الساعات المكتسبة للفصل</p>
                 </div>
-                
-                <div class="result-card">
-                    <h3 data-ar="إجمالي النقاط" data-en="Total Points">إجمالي النقاط</h3>
-                    <div class="gpa-value" id="totalPoints">0.00</div>
-                    <p data-ar="مجموع النقاط" data-en="Total grade points">مجموع النقاط</p>
+                <div class="p-8 rounded-3xl bg-slate-800 text-white text-center shadow-xl shadow-slate-900/20">
+                    <p class="text-sm font-medium opacity-80 mb-2" data-ar="إجمالي النقاط" data-en="Total Points">إجمالي النقاط</p>
+                    <div class="text-5xl font-bold mb-2" id="totalPoints">0.0</div>
+                    <p class="text-xs opacity-70" data-ar="مجموع نقاط الفصل الحالي" data-en="Current semester total points">مجموع نقاط الفصل الحالي</p>
                 </div>
             </div>
             
-            <div class="actions">
-                <button class="clear-btn" onclick="clearAll()">
-                    <i class="fas fa-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="px-6 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold flex items-center gap-2 transition-all" onclick="clearAll()">
+                    <span class="material-icons-round">delete_sweep</span>
+                    <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span>
                 </button>
-                <button class="save-btn" onclick="saveResults()">
-                    <i class="fas fa-save"></i> <span data-ar="حفظ النتائج" data-en="Save Results">حفظ النتائج</span>
+                <button class="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 transition-all" onclick="saveResults()">
+                    <span class="material-icons-round">save</span>
+                    <span data-ar="حفظ النتائج" data-en="Save Results">حفظ النتائج</span>
                 </button>
-                <button class="print-btn" onclick="printResultsPDF()">
-                    <i class="fas fa-print"></i> <span data-ar="طباعة PDF" data-en="Print PDF">طباعة PDF</span>
+                <button class="px-6 py-3 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold flex items-center gap-2 transition-all" onclick="printResultsPDF()">
+                    <span class="material-icons-round">picture_as_pdf</span>
+                    <span data-ar="طباعة PDF" data-en="Print PDF">طباعة PDF</span>
                 </button>
-                <button class="import-btn" onclick="document.getElementById('importFile').click()">
-                    <i class="fas fa-upload"></i> <span data-ar="استيراد البيانات" data-en="Import Data">استيراد البيانات</span>
+                <button class="px-6 py-3 bg-accent hover:bg-amber-600 text-white rounded-xl font-bold flex items-center gap-2 transition-all" onclick="document.getElementById('importFile').click()">
+                    <span class="material-icons-round">file_download</span>
+                    <span data-ar="استيراد البيانات" data-en="Import Data">استيراد البيانات</span>
                 </button>
                 <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(this)">
             </div>
         </div>
+    </section>
 
-        <!-- قسم حساب GPA التراكمي -->
-        <div class="cumulative-section">
-            <h2><i class="fas fa-chart-area"></i> <span data-ar="حساب GPA التراكمي" data-en="Cumulative GPA Calculation">حساب GPA التراكمي</span></h2>
-            
-            <div class="cumulative-input">
-                <div class="input-group">
-                    <label for="currentGPA" data-ar="المعدل التراكمي الحالي:" data-en="Current Cumulative GPA:">المعدل التراكمي الحالي:</label>
-                    <input type="number" id="currentGPA" placeholder="مثال: 3.5" data-ar-placeholder="مثال: 3.5" data-en-placeholder="Example: 3.5" step="0.01" min="0" max="4" inputmode="decimal">
-                </div>
-                
-                <div class="input-group">
-                    <label for="currentHours" data-ar="الساعات المكتسبة سابقاً:" data-en="Previously Earned Hours:">الساعات المكتسبة سابقاً:</label>
-                    <input type="number" id="currentHours" placeholder="مثال: 45" data-ar-placeholder="مثال: 45" data-en-placeholder="Example: 45" min="0" step="1" inputmode="numeric">
-                </div>
-                
-                <div class="calculation-buttons">
-                    <button class="auto-calculate-btn" onclick="autoCalculateGPA()">
-                        <i class="fas fa-magic"></i> <span data-ar="الحساب التلقائي" data-en="Auto Calculate">الحساب التلقائي</span>
-                    </button>
-                    <button class="manual-calculate-btn" onclick="manualCalculateGPA()">
-                        <i class="fas fa-edit"></i> <span data-ar="الحساب اليدوي" data-en="Manual Calculate">الحساب اليدوي</span>
-                    </button>
-                </div>
-                
-                <div class="english-hours-notice" id="englishNotice" style="display: none;">
-                    <i class="fas fa-info-circle"></i>
-                    <span data-ar="تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي" data-en="Notice: 16 hours of English courses will be deducted from total hours as they don't count in cumulative GPA calculation">تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي</span>
-                </div>
-            </div>
-
-            <div class="cumulative-results" id="cumulativeResults" style="display: none;">
-                <h3 data-ar="نتائج حساب GPA التراكمي" data-en="Cumulative GPA Results">نتائج حساب GPA التراكمي</h3>
-                <div class="cumulative-grid">
-                    <div class="cumulative-card">
-                        <h4 data-ar="المعدل التراكمي الجديد" data-en="New Cumulative GPA">المعدل التراكمي الجديد</h4>
-                        <div class="gpa-value" id="newCumulativeGPA">0.00</div>
-                        <p data-ar="المعدل بعد إضافة الفصل الحالي" data-en="GPA after adding current semester">المعدل بعد إضافة الفصل الحالي</p>
-                    </div>
-                    
-                    <div class="cumulative-card">
-                        <h4 data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</h4>
-                        <div class="gpa-value" id="totalCumulativeHours">0</div>
-                        <p data-ar="الساعات الإجمالية" data-en="Total credit hours">الساعات الإجمالية</p>
-                    </div>
-                    
-                    <div class="cumulative-card">
-                        <h4 data-ar="التغيير في المعدل" data-en="GPA Change">التغيير في المعدل</h4>
-                        <div class="gpa-change" id="gpaChange">0.00</div>
-                        <p id="changeDescription" data-ar="لا يوجد تغيير في المعدل" data-en="No change in GPA">لا يوجد تغيير في المعدل</p>
-                    </div>
-                </div>
-            </div>
+    <!-- Cumulative GPA Section -->
+    <section class="mt-12 bg-white dark:bg-slate-900 rounded-3xl p-10 shadow-xl border border-slate-200 dark:border-slate-800">
+        <div class="flex items-center gap-3 mb-10">
+            <span class="material-icons-round text-primary dark:text-secondary text-3xl">query_stats</span>
+            <h3 class="text-2xl font-bold" data-ar="حساب GPA التراكمي" data-en="Cumulative GPA Calculation">حساب GPA التراكمي</h3>
         </div>
-
-        <!-- قسم المعلومات -->
-        <div class="info-section">
-            <h2><i class="fas fa-info-circle"></i> <span data-ar="معلومات مهمة" data-en="Important Information">معلومات مهمة</span></h2>
-            <div class="info-grid">
-                <div class="info-card">
-                    <h4 data-ar="نظام الدرجات - 3 ساعات" data-en="Grading System - 3 Hours">نظام الدرجات - 3 ساعات</h4>
-                    <ul>
-                        <li data-ar="A+ = 12 نقطة" data-en="A+ = 12 points">A+ = 12 نقطة</li>
-                        <li data-ar="A = 11.3 نقطة" data-en="A = 11.3 points">A = 11.3 نقطة</li>
-                        <li data-ar="B+ = 10.5 نقطة" data-en="B+ = 10.5 points">B+ = 10.5 نقطة</li>
-                        <li data-ar="B = 9 نقاط" data-en="B = 9 points">B = 9 نقاط</li>
-                        <li data-ar="C+ = 7.5 نقطة" data-en="C+ = 7.5 points">C+ = 7.5 نقطة</li>
-                        <li data-ar="C = 6 نقاط" data-en="C = 6 points">C = 6 نقاط</li>
-                        <li data-ar="D+ = 4.5 نقطة" data-en="D+ = 4.5 points">D+ = 4.5 نقطة</li>
-                        <li data-ar="D = 3 نقاط" data-en="D = 3 points">D = 3 نقاط</li>
-                        <li data-ar="F = 0 نقطة" data-en="F = 0 points">F = 0 نقطة</li>
-                        <li data-ar="NP = ناجح (لا يدخل في المعدل)" data-en="NP = Pass (not counted in GPA)">NP = ناجح (لا يدخل في المعدل)</li>
-                        <li data-ar="NF = راسب (لا يدخل في المعدل)" data-en="NF = Fail (not counted in GPA)">NF = راسب (لا يدخل في المعدل)</li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <h4 data-ar="نظام الدرجات - 2 ساعة" data-en="Grading System - 2 Hours">نظام الدرجات - 2 ساعة</h4>
-                    <ul>
-                        <li data-ar="A+ = 8 نقاط" data-en="A+ = 8 points">A+ = 8 نقاط</li>
-                        <li data-ar="A = 7.5 نقطة" data-en="A = 7.5 points">A = 7.5 نقطة</li>
-                        <li data-ar="B+ = 7 نقاط" data-en="B+ = 7 points">B+ = 7 نقاط</li>
-                        <li data-ar="B = 6 نقاط" data-en="B = 6 points">B = 6 نقاط</li>
-                        <li data-ar="C+ = 5 نقاط" data-en="C+ = 5 points">C+ = 5 نقاط</li>
-                        <li data-ar="C = 4 نقاط" data-en="C = 4 points">C = 4 نقاط</li>
-                        <li data-ar="D+ = 3 نقاط" data-en="D+ = 3 points">D+ = 3 نقاط</li>
-                        <li data-ar="D = 2 نقطة" data-en="D = 2 points">D = 2 نقطة</li>
-                        <li data-ar="F = 0 نقطة" data-en="F = 0 points">F = 0 نقطة</li>
-                        <li data-ar="NP = ناجح (لا يدخل في المعدل)" data-en="NP = Pass (not counted in GPA)">NP = ناجح (لا يدخل في المعدل)</li>
-                        <li data-ar="NF = راسب (لا يدخل في المعدل)" data-en="NF = Fail (not counted in GPA)">NF = راسب (لا يدخل في المعدل)</li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <h4 data-ar="ملاحظات مهمة" data-en="Important Notes">ملاحظات مهمة</h4>
-                    <ul>
-                        <li data-ar="GPA = مجموع النقاط ÷ الساعات المكتسبة" data-en="GPA = Total Points ÷ Credit Hours Earned">GPA = مجموع النقاط ÷ الساعات المكتسبة</li>
-                        <li data-ar="GPA التراكمي = (النقاط السابقة + نقاط الفصل الحالي) ÷ (الساعات السابقة + ساعات الفصل الحالي)" data-en="Cumulative GPA = (Previous Points + Current Semester Points) ÷ (Previous Hours + Current Semester Hours)">GPA التراكمي = (النقاط السابقة + نقاط الفصل الحالي) ÷ (الساعات السابقة + ساعات الفصل الحالي)</li>
-                        <li data-ar="المواد ذات درجات NP/NF لا تدخل في حساب المعدل" data-en="Courses with NP/NF grades are not counted in GPA">المواد ذات درجات NP/NF لا تدخل في حساب المعدل</li>
-                        <li data-ar="جميع المواد الأخرى تدخل في حساب المعدل" data-en="All other courses are counted in GPA">جميع المواد الأخرى تدخل في حساب المعدل</li>
-                    </ul>
-                </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300" for="currentGPA" data-ar="المعدل التراكمي الحالي:" data-en="Current Cumulative GPA:">المعدل التراكمي الحالي:</label>
+                <input class="w-full h-14 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg px-4" id="currentGPA" placeholder="مثال: 3.5" data-ar-placeholder="مثال: 3.5" data-en-placeholder="Example: 3.5" type="number" step="0.01" min="0" max="4" inputmode="decimal"/>
             </div>
-        </div>
-    </div>
-
-    <!-- الفوتر -->
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3 data-ar="حاسبة GPA" data-en="GPA Calculator">حاسبة GPA</h3>
-                <p data-ar="موقع طلابي لتسهيل حساب المعدل التراكمي" data-en="Student website for easy GPA calculation">موقع طلابي لتسهيل حساب المعدل التراكمي</p>
-                <p data-ar="من تطوير طلاب كلية الحوسبة والمعلوماتية" data-en="Developed by students of Computing and Informatics College">من تطوير طلاب كلية الحوسبة والمعلوماتية</p>
-            </div>
-            
-            <div class="footer-section">
-                <h3 data-ar="روابط مهمة" data-en="Important Links">روابط مهمة</h3>
-                <div class="footer-links">
-                    <a href="https://t.me/Computing_and_Informatics" target="_blank" class="footer-link">
-                        <i class="fab fa-telegram"></i>
-                        <span data-ar="قروب كلية الحوسبة" data-en="Computing College Group">قروب كلية الحوسبة</span>
-                    </a>
-                    <a href="https://t.me/archivesSEU" target="_blank" class="footer-link">
-                        <i class="fas fa-archive"></i>
-                        <span data-ar="قناة أرشيف الجامعة" data-en="University Archive Channel">قناة أرشيف الجامعة</span>
-                    </a>
-                </div>
-            </div>
-            
-            <div class="footer-section">
-                <h3 data-ar="الجامعة السعودية الإلكترونية" data-en="Saudi Electronic University">الجامعة السعودية الإلكترونية</h3>
-                <p>SEU - Saudi Electronic University</p>
-                <p data-ar="كلية الحوسبة والمعلوماتية" data-en="College of Computing and Informatics">كلية الحوسبة والمعلوماتية</p>
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300" for="currentHours" data-ar="الساعات المكتسبة سابقاً:" data-en="Previously Earned Hours:">الساعات المكتسبة سابقاً:</label>
+                <input class="w-full h-14 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg px-4" id="currentHours" placeholder="مثال: 45" data-ar-placeholder="مثال: 45" data-en-placeholder="Example: 45" type="number" min="0" step="1" inputmode="numeric"/>
             </div>
         </div>
         
-        <div class="footer-bottom">
-            <p data-ar="&copy; 2025 حاسبة GPA - تطوير طلابي" data-en="&copy; 2025 GPA Calculator - Student Development">&copy; 2024 حاسبة GPA - تطوير طلابي</p>
+        <div class="flex flex-wrap gap-4 mt-10">
+            <button class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-sky-500/20 transition-all flex items-center justify-center gap-2" onclick="autoCalculateGPA()">
+                <span class="material-icons-round">auto_fix_high</span>
+                <span data-ar="الحساب التلقائي" data-en="Auto Calculate">الحساب التلقائي</span>
+            </button>
+            <button class="flex-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold py-4 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2" onclick="manualCalculateGPA()">
+                <span class="material-icons-round">edit</span>
+                <span data-ar="الحساب اليدوي" data-en="Manual Calculate">الحساب اليدوي</span>
+            </button>
         </div>
-    </footer>
+        
+        <div class="english-hours-notice" id="englishNotice" style="display: none;">
+            <i class="fas fa-info-circle"></i>
+            <span data-ar="تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي" data-en="Notice: 16 hours of English courses will be deducted from total hours as they don't count in cumulative GPA calculation">تنبيه: سيتم طرح 16 ساعة من مقررات اللغة الإنجليزية من إجمالي الساعات لأنها لا تدخل في حساب المعدل التراكمي</span>
+        </div>
+        
+        <!-- Cumulative Results -->
+        <div id="cumulativeResults" style="display: none;">
+            <h3 data-ar="نتائج حساب GPA التراكمي" data-en="Cumulative GPA Results">نتائج حساب GPA التراكمي</h3>
+            <div class="cumulative-grid">
+                <div class="cumulative-card">
+                    <h4 data-ar="المعدل التراكمي الجديد" data-en="New Cumulative GPA">المعدل التراكمي الجديد</h4>
+                    <div class="gpa-value" id="newCumulativeGPA">0.00</div>
+                    <p data-ar="المعدل بعد إضافة الفصل الحالي" data-en="GPA after adding current semester">المعدل بعد إضافة الفصل الحالي</p>
+                </div>
+                <div class="cumulative-card">
+                    <h4 data-ar="إجمالي الساعات" data-en="Total Hours">إجمالي الساعات</h4>
+                    <div class="gpa-value" id="totalCumulativeHours">0</div>
+                    <p data-ar="الساعات الإجمالية" data-en="Total credit hours">الساعات الإجمالية</p>
+                </div>
+                <div class="cumulative-card">
+                    <h4 data-ar="التغيير في المعدل" data-en="GPA Change">التغيير في المعدل</h4>
+                    <div class="gpa-change" id="gpaChange">0.00</div>
+                    <p id="changeDescription" data-ar="لا يوجد تغيير في المعدل" data-en="No change in GPA">لا يوجد تغيير في المعدل</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- Target GPA Calculator Section -->
+    <section class="mt-12 bg-white dark:bg-slate-900 rounded-3xl p-10 shadow-xl border border-slate-200 dark:border-slate-800 relative overflow-hidden" id="target-gpa-section">
+        <!-- Locked Overlay -->
+        <div id="sectionLockedOverlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-3xl" style="background: rgba(0,0,0,0.92); backdrop-filter: blur(8px);">
+            <div class="text-center px-6">
+                <span class="material-icons-round text-6xl text-white/30 mb-4">lock</span>
+                <h3 class="text-5xl font-black text-white mb-3 tracking-wider">SOON</h3>
+                <p class="text-white/60 mb-8" data-ar="هذه الميزة قادمة قريباً" data-en="This feature is coming soon">هذه الميزة قادمة قريباً</p>
+                <div id="countdownTimer" class="flex justify-center gap-4 mb-6">
+                    <div class="bg-white/10 rounded-xl p-4 min-w-[80px]">
+                        <span id="countdown-days" class="text-3xl font-bold text-white block">00</span>
+                        <span class="text-xs text-white/50" data-ar="يوم" data-en="Days">يوم</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 min-w-[80px]">
+                        <span id="countdown-hours" class="text-3xl font-bold text-white block">00</span>
+                        <span class="text-xs text-white/50" data-ar="ساعة" data-en="Hours">ساعة</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 min-w-[80px]">
+                        <span id="countdown-minutes" class="text-3xl font-bold text-white block">00</span>
+                        <span class="text-xs text-white/50" data-ar="دقيقة" data-en="Minutes">دقيقة</span>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4 min-w-[80px]">
+                        <span id="countdown-seconds" class="text-3xl font-bold text-white block">00</span>
+                        <span class="text-xs text-white/50" data-ar="ثانية" data-en="Seconds">ثانية</span>
+                    </div>
+                </div>
+                <p class="text-white/40 text-sm" data-ar="متاح في 12 يناير 2026" data-en="Available on January 12, 2026">متاح في 12 يناير 2026</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 mb-10">
+            <span class="material-icons-round text-primary dark:text-secondary text-3xl">flag</span>
+            <h3 class="text-2xl font-bold" data-ar="حساب المعدل المطلوب" data-en="Target GPA Calculator">حساب المعدل المطلوب</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300" for="targetCurrentGPA" data-ar="معدلك الحالي:" data-en="Your Current GPA:">معدلك الحالي:</label>
+                <input class="w-full h-14 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg px-4" id="targetCurrentGPA" placeholder="مثال: 2.5" data-ar-placeholder="مثال: 2.5" data-en-placeholder="Example: 2.5" type="number" step="0.01" min="0" max="4" inputmode="decimal"/>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300" for="targetCurrentHours" data-ar="الساعات المنجزة:" data-en="Completed Hours:">الساعات المنجزة:</label>
+                <input class="w-full h-14 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg px-4" id="targetCurrentHours" placeholder="مثال: 60" data-ar-placeholder="مثال: 60" data-en-placeholder="Example: 60" type="number" min="0" step="1" inputmode="numeric"/>
+            </div>
+            <div class="space-y-3">
+                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300" for="targetDesiredGPA" data-ar="المعدل المطلوب:" data-en="Target GPA:">المعدل المطلوب:</label>
+                <input class="w-full h-14 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-lg px-4" id="targetDesiredGPA" placeholder="مثال: 3.5" data-ar-placeholder="مثال: 3.5" data-en-placeholder="Example: 3.5" type="number" step="0.01" min="0" max="4" inputmode="decimal"/>
+            </div>
+        </div>
+        
+        <button class="w-full bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2" onclick="calculateTargetGPA()">
+            <span class="material-icons-round">trending_up</span>
+            <span data-ar="احسب المطلوب" data-en="Calculate Required">احسب المطلوب</span>
+        </button>
+        
+        <div class="english-hours-notice mt-4" id="targetEnglishNotice" style="display: none;">
+            <i class="fas fa-info-circle"></i>
+            <span data-ar="تنبيه: تم خصم 16 ساعة من مقررات اللغة الإنجليزية تلقائياً لأنها لا تدخل في حساب المعدل التراكمي" data-en="Notice: 16 hours of English courses have been automatically deducted as they don't count in cumulative GPA calculation">تنبيه: تم خصم 16 ساعة من مقررات اللغة الإنجليزية تلقائياً لأنها لا تدخل في حساب المعدل التراكمي</span>
+        </div>
+        
+        <!-- Target GPA Results -->
+        <div id="targetGPAResults" style="display: none;" class="mt-8">
+            <div class="p-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white mb-6" id="targetSummary">
+                <div class="flex items-center gap-3 mb-3">
+                    <span class="material-icons-round text-3xl">lightbulb</span>
+                    <h4 class="text-xl font-bold" data-ar="ملخص النتيجة" data-en="Result Summary">ملخص النتيجة</h4>
+                </div>
+                <p class="text-lg leading-relaxed" id="targetSummaryText"></p>
+            </div>
+            
+            <h4 class="text-lg font-bold text-slate-700 dark:text-slate-300 mb-4 flex items-center gap-2">
+                <span class="material-icons-round text-primary">explore</span>
+                <span data-ar="السيناريوهات المتاحة" data-en="Available Scenarios">السيناريوهات المتاحة</span>
+            </h4>
+            
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4" data-ar="💡 ملاحظة: كل سيناريو يفترض الحصول على نفس الدرجة في جميع المواد. يمكنك الوصول للمعدل المطلوب بمزيج من الدرجات المختلفة." data-en="💡 Note: Each scenario assumes the same grade in all courses. You can reach your target GPA with a mix of different grades.">💡 ملاحظة: كل سيناريو يفترض الحصول على نفس الدرجة في جميع المواد. يمكنك الوصول للمعدل المطلوب بمزيج من الدرجات المختلفة.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="scenariosGrid">
+                <!-- Scenarios will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="mt-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800" id="targetWarning" style="display: none;">
+                <div class="flex items-start gap-3">
+                    <span class="material-icons-round text-amber-500">warning</span>
+                    <p class="text-amber-700 dark:text-amber-300 text-sm" id="targetWarningText"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="mt-12" id="info-section">
+        <div class="flex items-center gap-3 mb-8">
+            <span class="material-icons-round text-primary dark:text-secondary text-3xl">help_outline</span>
+            <h3 class="text-2xl font-bold" data-ar="معلومات تهمك" data-en="Important Information">معلومات تهمك</h3>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-800">
+                <h4 class="text-lg font-bold text-primary dark:text-secondary mb-6 flex items-center gap-2">
+                    <span class="material-icons-round">format_list_numbered</span>
+                    <span data-ar="نظام الدرجات (3 ساعات)" data-en="Grading System (3 Hours)">نظام الدرجات (3 ساعات)</span>
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">A+</span> <span class="text-slate-500" data-ar="12 نقطة" data-en="12 points">12 نقطة</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white dark:bg-slate-900 rounded-lg">
+                        <span class="font-bold">A</span> <span class="text-slate-500" data-ar="11.3 نقطة" data-en="11.3 points">11.3 نقطة</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">B+</span> <span class="text-slate-500" data-ar="10.5 نقطة" data-en="10.5 points">10.5 نقطة</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white dark:bg-slate-900 rounded-lg">
+                        <span class="font-bold">B</span> <span class="text-slate-500" data-ar="9 نقاط" data-en="9 points">9 نقاط</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">C+</span> <span class="text-slate-500" data-ar="7.5 نقطة" data-en="7.5 points">7.5 نقطة</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-800">
+                <h4 class="text-lg font-bold text-primary dark:text-secondary mb-6 flex items-center gap-2">
+                    <span class="material-icons-round">format_list_numbered</span>
+                    <span data-ar="نظام الدرجات (2 ساعة)" data-en="Grading System (2 Hours)">نظام الدرجات (2 ساعة)</span>
+                </h4>
+                <div class="space-y-3">
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">A+</span> <span class="text-slate-500" data-ar="8 نقاط" data-en="8 points">8 نقاط</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white dark:bg-slate-900 rounded-lg">
+                        <span class="font-bold">A</span> <span class="text-slate-500" data-ar="7.5 نقطة" data-en="7.5 points">7.5 نقطة</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">B+</span> <span class="text-slate-500" data-ar="7 نقاط" data-en="7 points">7 نقاط</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-white dark:bg-slate-900 rounded-lg">
+                        <span class="font-bold">B</span> <span class="text-slate-500" data-ar="6 نقاط" data-en="6 points">6 نقاط</span>
+                    </div>
+                    <div class="flex justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                        <span class="font-bold">C+</span> <span class="text-slate-500" data-ar="5 نقاط" data-en="5 points">5 نقاط</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-lg border border-slate-100 dark:border-slate-800">
+                <h4 class="text-lg font-bold text-primary dark:text-secondary mb-6 flex items-center gap-2">
+                    <span class="material-icons-round">tips_and_updates</span>
+                    <span data-ar="ملاحظات هامة" data-en="Important Notes">ملاحظات هامة</span>
+                </h4>
+                <ul class="space-y-4 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+                    <li class="flex gap-3">
+                        <span class="material-icons-round text-accent text-sm mt-1">check_circle</span>
+                        <span data-ar="GPA = مجموع النقاط ÷ الساعات المكتسبة" data-en="GPA = Total Points ÷ Credit Hours">GPA = مجموع النقاط ÷ الساعات المكتسبة</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="material-icons-round text-accent text-sm mt-1">check_circle</span>
+                        <span data-ar="المواد ذات درجات NP/NF لا تدخل في حساب المعدل." data-en="NP/NF grades are not counted in GPA.">المواد ذات درجات NP/NF لا تدخل في حساب المعدل.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="material-icons-round text-accent text-sm mt-1">check_circle</span>
+                        <span data-ar="جميع المواد الأخرى تدخل في حساب المعدل التراكمي والسنوي." data-en="All other courses are counted in cumulative and yearly GPA.">جميع المواد الأخرى تدخل في حساب المعدل التراكمي والسنوي.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-slate-900 text-slate-300 pt-20 pb-10 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="bg-primary p-2 rounded-lg">
+                        <span class="material-icons-round text-white">school</span>
+                    </div>
+                    <h4 class="text-xl font-bold text-white" data-ar="حاسبة GPA" data-en="GPA Calculator">حاسبة GPA</h4>
+                </div>
+                <p class="text-sm leading-relaxed opacity-70" data-ar="مشروع طلابي غير رسمي يهدف لتسهيل عملية حساب المعدل الأكاديمي لطلاب الجامعة السعودية الإلكترونية بدقة وسهولة." data-en="An unofficial student project aimed at facilitating GPA calculation for Saudi Electronic University students with accuracy and ease.">
+                    مشروع طلابي غير رسمي يهدف لتسهيل عملية حساب المعدل الأكاديمي لطلاب الجامعة السعودية الإلكترونية بدقة وسهولة.
+                </p>
+            </div>
+            <div>
+                <h5 class="text-white font-bold mb-6" data-ar="روابط سريعة" data-en="Quick Links">روابط سريعة</h5>
+                <ul class="space-y-4 text-sm">
+                    <li><a class="hover:text-primary transition-colors" href="#" data-ar="عن الحاسبة" data-en="About Calculator">عن الحاسبة</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#" data-ar="نظام الدرجات" data-en="Grading System">نظام الدرجات</a></li>
+                    <li><a class="hover:text-primary transition-colors" href="#" data-ar="طريقة الحساب" data-en="Calculation Method">طريقة الحساب</a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-bold mb-6" data-ar="مشاريع المطور" data-en="Developer Projects">مشاريع المطور</h5>
+                <ul class="space-y-4 text-sm">
+                    <li><a class="hover:text-primary transition-colors flex items-center gap-2" href="https://subjectsearch.tech/" target="_blank"><span class="material-icons-round text-sm">search</span><span data-ar="SubjectSearch - محرك بحث للمواد" data-en="SubjectSearch - Course Search Engine">SubjectSearch - محرك بحث للمواد</span></a></li>
+                    <li><a class="hover:text-primary transition-colors flex items-center gap-2" href="https://fxrg.github.io/SEU-Planner/" target="_blank"><span class="material-icons-round text-sm">event_note</span><span data-ar="SEU Planner - مخطط الجداول" data-en="SEU Planner - Schedule Planner">SEU Planner - مخطط الجداول</span></a></li>
+                </ul>
+            </div>
+            <div>
+                <h5 class="text-white font-bold mb-6" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</h5>
+                <div class="flex gap-4">
+                    <a class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-all" href="https://t.me/Computing_and_Informatics" target="_blank">
+                        <span class="material-icons-round">chat</span>
+                    </a>
+                    <a class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-primary transition-all" href="https://t.me/archivesSEU" target="_blank">
+                        <span class="material-icons-round">alternate_email</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="pt-8 border-t border-slate-800 text-center text-sm opacity-50">
+            <p data-ar="© 2026 حاسبة GPA - جميع الحقوق محفوظة لطلاب الجامعة السعودية الإلكترونية" data-en="© 2026 GPA Calculator - All rights reserved for Saudi Electronic University students">© 2026 حاسبة GPA - جميع الحقوق محفوظة لطلاب الجامعة السعودية الإلكترونية</p>
+        </div>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+// Countdown Timer for Target GPA Section
+(function() {
+    const unlockDate = new Date('2026-01-12T00:00:00').getTime();
+    const overlay = document.getElementById('sectionLockedOverlay');
+    
+    function updateCountdown() {
+        const now = new Date().getTime();
+        const distance = unlockDate - now;
+        
+        if (distance <= 0) {
+            // Unlock the section
+            if (overlay) overlay.style.display = 'none';
+            return;
+        }
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        document.getElementById('countdown-days').textContent = String(days).padStart(2, '0');
+        document.getElementById('countdown-hours').textContent = String(hours).padStart(2, '0');
+        document.getElementById('countdown-minutes').textContent = String(minutes).padStart(2, '0');
+        document.getElementById('countdown-seconds').textContent = String(seconds).padStart(2, '0');
+    }
+    
+    // Check immediately
+    updateCountdown();
+    
+    // Update every second
+    setInterval(updateCountdown, 1000);
+})();
+</script>
 </body>
 </html> 

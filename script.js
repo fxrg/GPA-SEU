@@ -151,12 +151,20 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleTheme() {
     currentTheme = currentTheme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', currentTheme);
+    
+    // Toggle dark class for Tailwind CSS
+    if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    
     localStorage.setItem('theme', currentTheme);
     
     // تحديث أيقونة الوضع المظلم
-    const themeIcon = document.querySelector('.theme-toggle i');
+    const themeIcon = document.querySelector('.theme-toggle .material-icons-round');
     if (themeIcon) {
-        themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        themeIcon.textContent = currentTheme === 'dark' ? 'light_mode' : 'dark_mode';
     }
     
     showNotification(
@@ -170,10 +178,17 @@ function loadTheme() {
     currentTheme = savedTheme;
     document.documentElement.setAttribute('data-theme', currentTheme);
     
+    // Toggle dark class for Tailwind CSS
+    if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    
     // تحديث أيقونة الوضع المظلم
-    const themeIcon = document.querySelector('.theme-toggle i');
+    const themeIcon = document.querySelector('.theme-toggle .material-icons-round');
     if (themeIcon) {
-        themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        themeIcon.textContent = currentTheme === 'dark' ? 'light_mode' : 'dark_mode';
     }
 }
 
@@ -309,8 +324,9 @@ function updateCoursesList() {
     if (courses.length === 0) {
         coursesList.innerHTML = `
             <div class="empty-state">
-                <i class="fas fa-book-open"></i>
-                <p>${getTranslation('لم يتم إضافة أي مواد بعد', 'No courses added yet')}</p>
+                <span class="material-icons-round text-slate-300 dark:text-slate-600" style="font-size: 4rem;">auto_stories</span>
+                <h4 class="text-xl font-semibold text-slate-500 dark:text-slate-400 mt-4">${getTranslation('لا توجد مواد مضافة بعد', 'No courses added yet')}</h4>
+                <p class="text-slate-400 mt-2">${getTranslation('ابدأ بإضافة المواد الدراسية أعلاه لحساب المعدل', 'Start adding courses above to calculate GPA')}</p>
             </div>
         `;
         return;
@@ -1371,4 +1387,206 @@ function printResultsPDF() {
     doc.save(fileName);
     
     showNotification(getTranslation('تم إنشاء ملف PDF بنجاح', 'PDF file generated successfully'), 'success');
+}
+
+// حساب المعدل المطلوب
+function calculateTargetGPA() {
+    const currentGPA = parseFloat(document.getElementById('targetCurrentGPA').value);
+    const currentHours = parseInt(document.getElementById('targetCurrentHours').value);
+    const targetGPA = parseFloat(document.getElementById('targetDesiredGPA').value);
+    
+    // التحقق من صحة البيانات
+    if (isNaN(currentGPA) || isNaN(currentHours) || isNaN(targetGPA)) {
+        showNotification(getTranslation('يرجى إدخال جميع البيانات المطلوبة', 'Please enter all required data'), 'error');
+        return;
+    }
+    
+    if (currentGPA < 0 || currentGPA > 4 || targetGPA < 0 || targetGPA > 4) {
+        showNotification(getTranslation('المعدل يجب أن يكون بين 0 و 4', 'GPA must be between 0 and 4'), 'error');
+        return;
+    }
+    
+    if (currentHours < 0) {
+        showNotification(getTranslation('الساعات يجب أن تكون رقم موجب', 'Hours must be a positive number'), 'error');
+        return;
+    }
+    
+    // خصم 16 ساعة من مقررات اللغة الإنجليزية (مثل حساب المعدل التراكمي)
+    const adjustedHours = Math.max(0, currentHours - 16);
+    
+    // حساب النقاط الحالية بعد خصم ساعات الإنجليزي
+    const currentPoints = currentGPA * adjustedHours;
+    
+    // إظهار تنبيه خصم الساعات
+    const targetNotice = document.getElementById('targetEnglishNotice');
+    if (targetNotice) {
+        targetNotice.style.display = 'flex';
+    }
+    
+    // إظهار قسم النتائج
+    document.getElementById('targetGPAResults').style.display = 'block';
+    
+    const summaryDiv = document.getElementById('targetSummary');
+    const summaryText = document.getElementById('targetSummaryText');
+    const warningDiv = document.getElementById('targetWarning');
+    const warningText = document.getElementById('targetWarningText');
+    const scenariosGrid = document.getElementById('scenariosGrid');
+    
+    // إذا كان المعدل الحالي أعلى من أو يساوي المطلوب
+    if (currentGPA >= targetGPA) {
+        summaryDiv.className = 'p-6 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white mb-6';
+        summaryText.textContent = getTranslation(
+            `🎉 تهانينا! معدلك الحالي (${currentGPA.toFixed(2)}) أعلى من أو يساوي المعدل المطلوب (${targetGPA.toFixed(2)}). استمر في التميز!`,
+            `🎉 Congratulations! Your current GPA (${currentGPA.toFixed(2)}) is already equal to or higher than your target (${targetGPA.toFixed(2)}). Keep up the great work!`
+        );
+        scenariosGrid.innerHTML = '';
+        warningDiv.style.display = 'none';
+        return;
+    }
+    
+    // حساب السيناريوهات المختلفة
+    const grades = [
+        { name: 'A+', gpa: 4.0, points3: 12, points2: 8, color: 'emerald' },
+        { name: 'A', gpa: 3.75, points3: 11.3, points2: 7.5, color: 'green' },
+        { name: 'B+', gpa: 3.5, points3: 10.5, points2: 7, color: 'teal' },
+        { name: 'B', gpa: 3.0, points3: 9, points2: 6, color: 'cyan' },
+        { name: 'C+', gpa: 2.5, points3: 7.5, points2: 5, color: 'sky' },
+        { name: 'C', gpa: 2.0, points3: 6, points2: 4, color: 'blue' }
+    ];
+    
+    let scenarios = [];
+    let isPossible = false;
+    
+    // حساب لكل درجة كم ساعة مطلوبة
+    for (const grade of grades) {
+        // المعادلة الصحيحة:
+        // (currentPoints + gradeGPA * newHours) / (adjustedHours + newHours) = targetGPA
+        // currentPoints + gradeGPA * newHours = targetGPA * adjustedHours + targetGPA * newHours
+        // gradeGPA * newHours - targetGPA * newHours = targetGPA * adjustedHours - currentPoints
+        // newHours * (gradeGPA - targetGPA) = targetGPA * adjustedHours - currentPoints
+        // newHours = (targetGPA * adjustedHours - currentPoints) / (gradeGPA - targetGPA)
+        
+        const gpaDiff = grade.gpa - targetGPA;
+        
+        if (gpaDiff <= 0) {
+            // لا يمكن الوصول بهذه الدرجة لأنها أقل من أو تساوي المطلوب
+            continue;
+        }
+        
+        // حساب الساعات المطلوبة
+        const neededPointsDiff = targetGPA * adjustedHours - currentPoints;
+        const requiredHours = Math.ceil(neededPointsDiff / gpaDiff);
+        
+        if (requiredHours > 0 && requiredHours <= 200) { // حد أقصى معقول
+            isPossible = true;
+            const requiredCourses3Hours = Math.ceil(requiredHours / 3);
+            const requiredCourses2Hours = Math.ceil(requiredHours / 2);
+            
+            scenarios.push({
+                grade: grade.name,
+                gpa: grade.gpa,
+                hours: requiredHours,
+                courses3: requiredCourses3Hours,
+                courses2: requiredCourses2Hours,
+                color: grade.color
+            });
+        }
+    }
+    
+    // حساب السيناريو المختلط (نصف A+ ونصف A)
+    const mixedScenario = calculateMixedScenario(currentPoints, adjustedHours, targetGPA);
+    
+    // عرض الملخص
+    if (isPossible && scenarios.length > 0) {
+        const bestScenario = scenarios[0];
+        summaryDiv.className = 'p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white mb-6';
+        summaryText.textContent = getTranslation(
+            `للوصول من معدل ${currentGPA.toFixed(2)} إلى معدل ${targetGPA.toFixed(2)}:\n• أقصر طريق: ${bestScenario.hours} ساعة بمعدل ${bestScenario.grade}\n• أو ساعات أكثر بدرجات أقل (انظر السيناريوهات أدناه)`,
+            `To go from GPA ${currentGPA.toFixed(2)} to ${targetGPA.toFixed(2)}:\n• Shortest path: ${bestScenario.hours} hours with ${bestScenario.grade}\n• Or more hours with lower grades (see scenarios below)`
+        );
+        
+        // عرض السيناريوهات
+        let scenariosHTML = '';
+        
+        for (const scenario of scenarios) {
+            // حساب مجموع النقاط المكتسبة
+            const totalPoints = (scenario.hours * scenario.gpa).toFixed(1);
+            const pointsLabel = getTranslation('نقطة', 'points');
+            
+            scenariosHTML += `
+                <div class="scenario-card scenario-${scenario.color}">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-2xl font-bold grade">${scenario.grade}</span>
+                        <span class="text-sm opacity-70">${totalPoints} ${pointsLabel}</span>
+                    </div>
+                    <div class="space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                        <p><strong>${scenario.hours}</strong> ${getTranslation('ساعة مطلوبة', 'hours required')}</p>
+                        <p><strong>${scenario.courses3}</strong> ${getTranslation('مادة (3 ساعات)', 'courses (3 hrs)')}</p>
+                        <p><strong>${scenario.courses2}</strong> ${getTranslation('مادة (2 ساعة)', 'courses (2 hrs)')}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // إضافة السيناريو المختلط
+        if (mixedScenario) {
+            scenariosHTML += `
+                <div class="scenario-card scenario-purple">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xl font-bold grade">${getTranslation('مختلط', 'Mixed')}</span>
+                        <span class="text-sm opacity-70">A+ & A</span>
+                    </div>
+                    <div class="space-y-1 text-sm text-slate-600 dark:text-slate-400">
+                        <p><strong>${mixedScenario.aPlus}</strong> ${getTranslation('مادة A+', 'A+ courses')}</p>
+                        <p><strong>${mixedScenario.a}</strong> ${getTranslation('مادة A', 'A courses')}</p>
+                        <p>${getTranslation('إجمالي', 'Total')}: <strong>${mixedScenario.totalHours}</strong> ${getTranslation('ساعة', 'hours')}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        scenariosGrid.innerHTML = scenariosHTML;
+        warningDiv.style.display = 'none';
+        
+    } else {
+        // غير ممكن
+        summaryDiv.className = 'p-6 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 text-white mb-6';
+        summaryText.textContent = getTranslation(
+            `⚠️ للأسف، الوصول من معدل ${currentGPA.toFixed(2)} إلى معدل ${targetGPA.toFixed(2)} يتطلب جهداً استثنائياً أو قد لا يكون ممكناً بالطرق التقليدية.`,
+            `⚠️ Unfortunately, going from GPA ${currentGPA.toFixed(2)} to ${targetGPA.toFixed(2)} requires exceptional effort or may not be achievable through traditional means.`
+        );
+        scenariosGrid.innerHTML = '';
+        
+        warningDiv.style.display = 'block';
+        warningText.textContent = getTranslation(
+            'قد تحتاج لإعادة بعض المواد أو التحدث مع المرشد الأكاديمي للحصول على خيارات إضافية.',
+            'You may need to retake some courses or consult with your academic advisor for additional options.'
+        );
+    }
+    
+    showNotification(getTranslation('تم حساب المعدل المطلوب - تم خصم 16 ساعة من مقررات الإنجليزي', 'Target GPA calculated - 16 English hours deducted'), 'success');
+}
+
+// حساب السيناريو المختلط
+function calculateMixedScenario(currentPoints, adjustedHours, targetGPA) {
+    // نفترض نصف A+ (4.0) ونصف A (3.75)
+    const mixedGPA = (4.0 + 3.75) / 2; // 3.875
+    
+    if (mixedGPA <= targetGPA) return null;
+    
+    const requiredPoints = targetGPA * adjustedHours - currentPoints;
+    const gpaDiff = mixedGPA - targetGPA;
+    const requiredHours = Math.ceil(requiredPoints / gpaDiff);
+    
+    if (requiredHours <= 0 || requiredHours > 200) return null;
+    
+    const coursesNeeded = Math.ceil(requiredHours / 3);
+    const aPlusCourses = Math.ceil(coursesNeeded / 2);
+    const aCourses = coursesNeeded - aPlusCourses;
+    
+    return {
+        aPlus: aPlusCourses,
+        a: aCourses,
+        totalHours: coursesNeeded * 3
+    };
 } 
