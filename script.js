@@ -985,24 +985,301 @@ function updateGradeOptions() {
     }
 }
 
+let pdfArabicSupportInitPromise = null;
+let pdfArabicSupportReady = false;
+
+function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) {
+            if (existing.getAttribute('data-loaded') === 'true') {
+                resolve();
+                return;
+            }
+            existing.addEventListener('load', () => resolve(), { once: true });
+            existing.addEventListener('error', () => reject(new Error(`Failed to load script: ${src}`)), { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = src;
+        script.async = true;
+        script.onload = () => {
+            script.setAttribute('data-loaded', 'true');
+            resolve();
+        };
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+    });
+}
+
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    const chunkSize = 0x8000;
+    let binary = '';
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        const chunk = bytes.subarray(i, i + chunkSize);
+        binary += String.fromCharCode.apply(null, chunk);
+    }
+    return btoa(binary);
+}
+
+async function ensureArabicPdfSupport(jsPDF, doc) {
+    if (pdfArabicSupportReady) {
+        return true;
+    }
+
+    if (!pdfArabicSupportInitPromise) {
+        pdfArabicSupportInitPromise = (async () => {
+            const utf8PluginUrl = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.utf8.min.js';
+            const arabicPluginUrl = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.plugin.arabic.min.js';
+            const arabicFontUrl = 'https://unpkg.com/@fontsource/noto-naskh-arabic/files/noto-naskh-arabic-arabic-400-normal.ttf';
+
+            await loadScriptOnce(utf8PluginUrl);
+
+            if (!jsPDF.API.processArabic) {
+                await loadScriptOnce(arabicPluginUrl);
+            }
+
+            const fontResponse = await fetch(arabicFontUrl);
+            if (!fontResponse.ok) {
+                throw new Error('Arabic font request failed');
+            }
+
+            const fontBuffer = await fontResponse.arrayBuffer();
+            const fontBase64 = arrayBufferToBase64(fontBuffer);
+            doc.addFileToVFS('NotoNaskhArabic-Regular.ttf', fontBase64);
+            doc.addFont('NotoNaskhArabic-Regular.ttf', 'NotoNaskhArabic', 'normal', 'Identity-H');
+
+            pdfArabicSupportReady = true;
+            return true;
+        })();
+    }
+
+    try {
+        await pdfArabicSupportInitPromise;
+        return true;
+    } catch (error) {
+        console.warn('Arabic PDF support fallback:', error);
+        return false;
+    }
+}
+
+function escapeHtml(value) {
+        if (value == null) return '';
+        return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+}
+
+function openNativePrintReport(isArabic) {
+        const semesterGPA = document.getElementById('semesterGPA')?.textContent || '0.00';
+        const totalHours = document.getElementById('totalHours')?.textContent || '0';
+        const totalPoints = document.getElementById('totalPoints')?.textContent || '0.0';
+        const cumulativeResultsEl = document.getElementById('cumulativeResults');
+        const currentGPAInputEl = document.getElementById('currentGPA');
+        const currentHoursInputEl = document.getElementById('currentHours');
+
+        let cumulativeGPADisplay = isArabic ? 'غير محسوب' : 'Not Calculated';
+        if (cumulativeResultsEl && cumulativeResultsEl.style.display !== 'none') {
+                cumulativeGPADisplay = document.getElementById('newCumulativeGPA')?.textContent || cumulativeGPADisplay;
+        } else if (currentGPAInputEl && currentGPAInputEl.value) {
+                cumulativeGPADisplay = currentGPAInputEl.value;
+        }
+
+        const coursesRows = courses.length
+                ? courses.map((course) => `
+                        <tr>
+                                <td>${escapeHtml(course.name)}</td>
+                                <td>${escapeHtml(course.hours)}</td>
+                                <td>${escapeHtml(getGradeText(course.grade))}</td>
+                                <td>${escapeHtml(course.grade === 'NP' || course.grade === 'NF' ? '--' : course.points.toFixed(1))}</td>
+                        </tr>
+                `).join('')
+                : `<tr><td colspan="4" class="muted">${isArabic ? 'لا توجد مواد مضافة' : 'No courses added'}</td></tr>`;
+
+        const titleMain = isArabic ? 'الجامعة السعودية الإلكترونية' : 'Saudi Electronic University';
+        const titleSub = isArabic ? 'كلية الحوسبة والمعلوماتية' : 'College of Computing and Informatics';
+        const reportTitle = isArabic ? 'تقرير المعدل التراكمي' : 'GPA Report';
+        const printDateLabel = isArabic ? 'تاريخ الطباعة' : 'Print Date';
+        const coursesTitle = isArabic ? 'تفاصيل المواد' : 'Course Details';
+
+        const html = `<!DOCTYPE html>
+<html lang="${isArabic ? 'ar' : 'en'}" dir="${isArabic ? 'rtl' : 'ltr'}">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(reportTitle)}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary:#1e3c72; --secondary:#667eea; --text:#333; --muted:#8d8d8d; --soft:#f5f5f7; }
+        * { box-sizing: border-box; }
+        body { margin:0; background:#fff; color:var(--text); font-family:${isArabic ? '"Amiri", serif' : '"Poppins", sans-serif'}; }
+        .page { width:210mm; min-height:297mm; margin:0 auto; background:#fff; }
+        .header { background:var(--primary); color:#fff; padding:18mm 12mm 8mm; display:flex; align-items:center; justify-content:space-between; }
+        .logo { width:22mm; height:22mm; border-radius:50%; background:#fff; color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:"Poppins", sans-serif; }
+        .headtxt h1 { margin:0; font-size:10mm; font-weight:700; }
+        .headtxt p { margin:2mm 0 0; font-size:5mm; opacity:.9; }
+        .content { padding:14mm 12mm; }
+        .center { text-align:center; }
+        h2 { margin:0; font-size:11mm; }
+        .date { color:var(--muted); margin-top:6mm; }
+        .line { height:1px; background:var(--secondary); margin:14mm 0 8mm; }
+        .hero-card { background:var(--soft); border-radius:4mm; padding:7mm; text-align:center; margin-bottom:8mm; }
+        .hero-card .label { color:var(--primary); font-weight:700; }
+        .hero-card .val { color:var(--secondary); font-size:12mm; line-height:1.2; font-family:"Poppins", sans-serif; }
+        .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:3mm; margin-bottom:8mm; }
+        .stat { border:1px solid var(--secondary); border-radius:3mm; padding:4mm 2mm; text-align:center; }
+        .stat .v { font-size:9mm; color:var(--primary); font-family:"Poppins", sans-serif; }
+        .stat .k { font-size:4mm; color:var(--muted); }
+        .section-title { font-size:7mm; color:var(--primary); margin:8mm 0 4mm; }
+        table { width:100%; border-collapse:collapse; }
+        th { background:var(--primary); color:#fff; font-weight:700; padding:3mm; border:1px solid #d7def3; }
+        td { padding:3mm; border:1px solid #d7def3; }
+        tbody tr:nth-child(even) { background:#fafbff; }
+        .muted { color:var(--muted); text-align:center; }
+        .footer { margin-top:8mm; color:var(--muted); font-size:3.5mm; text-align:center; }
+        @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .page { margin:0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="logo">SEU</div>
+            <div class="headtxt" style="text-align:${isArabic ? 'right' : 'left'};">
+                <h1>${escapeHtml(titleMain)}</h1>
+                <p>${escapeHtml(titleSub)}</p>
+            </div>
+        </div>
+        <div class="content">
+            <div class="center">
+                <h2>${escapeHtml(reportTitle)}</h2>
+                <div class="date">${escapeHtml(printDateLabel)}: ${new Date().toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}</div>
+            </div>
+            <div class="line"></div>
+
+            <div class="hero-card">
+                <div class="label">${escapeHtml(isArabic ? 'المعدل الفصلي (GPA)' : 'Semester GPA')}</div>
+                <div class="val">${escapeHtml(semesterGPA)}</div>
+            </div>
+
+            <div class="stats">
+                <div class="stat"><div class="v">${escapeHtml(totalHours)}</div><div class="k">${escapeHtml(isArabic ? 'إجمالي الساعات' : 'Total Hours')}</div></div>
+                <div class="stat"><div class="v">${escapeHtml(totalPoints)}</div><div class="k">${escapeHtml(isArabic ? 'إجمالي النقاط' : 'Total Points')}</div></div>
+                <div class="stat"><div class="v">${escapeHtml(String(courses.length))}</div><div class="k">${escapeHtml(isArabic ? 'عدد المواد' : 'Total Courses')}</div></div>
+                <div class="stat"><div class="v">${escapeHtml(cumulativeGPADisplay)}</div><div class="k">${escapeHtml(isArabic ? 'المعدل التراكمي' : 'Cumulative GPA')}</div></div>
+            </div>
+
+            <div class="section-title">${escapeHtml(coursesTitle)}</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>${escapeHtml(isArabic ? 'اسم المادة' : 'Course Name')}</th>
+                        <th>${escapeHtml(isArabic ? 'الساعات' : 'Hours')}</th>
+                        <th>${escapeHtml(isArabic ? 'الدرجة' : 'Grade')}</th>
+                        <th>${escapeHtml(isArabic ? 'النقاط' : 'Points')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${coursesRows}
+                </tbody>
+            </table>
+
+            <div class="footer">${escapeHtml(isArabic ? 'تم إنشاء هذا التقرير بواسطة حاسبة GPA - الجامعة السعودية الإلكترونية' : 'Generated by GPA Calculator - Saudi Electronic University')}</div>
+        </div>
+    </div>
+
+</body>
+</html>`;
+
+        const printWindow = window.open('', '_blank', 'width=1000,height=900');
+        if (!printWindow) {
+                showNotification(getTranslation('تعذر فتح نافذة الطباعة', 'Unable to open print window'), 'error');
+                return;
+        }
+
+        printWindow.document.open();
+        printWindow.document.write(html);
+        printWindow.document.close();
+
+        const triggerPrint = () => {
+                try {
+                        printWindow.focus();
+                        printWindow.print();
+                } catch (error) {
+                        console.warn('Native print failed:', error);
+                }
+        };
+
+        if (printWindow.document.readyState === 'complete') {
+                setTimeout(triggerPrint, 350);
+        } else {
+                printWindow.addEventListener('load', () => setTimeout(triggerPrint, 350), { once: true });
+        }
+}
+
 // دالة طباعة PDF محسنة مع قالب جميل
-function printResultsPDF() {
+async function printResultsPDF() {
     if (!window.jspdf) {
         showNotification(getTranslation('جاري تحميل مكتبة PDF...', 'Loading PDF library...'), 'info');
         const script = document.createElement('script');
         script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = printResultsPDF;
+        script.onload = () => { printResultsPDF(); };
         document.head.appendChild(script);
         return;
     }
     
     const { jsPDF } = window.jspdf;
     const isArabic = currentLanguage === 'ar';
+
+    if (isArabic) {
+        openNativePrintReport(true);
+        return;
+    }
+
     const doc = new jsPDF({
         orientation: 'p',
         unit: 'mm',
         format: 'a4'
     });
+
+    if (isArabic) {
+        const isArabicReady = await ensureArabicPdfSupport(jsPDF, doc);
+        if (isArabicReady) {
+            doc.setFont('NotoNaskhArabic', 'normal');
+            if (typeof doc.setR2L === 'function') {
+                doc.setR2L(true);
+            }
+        } else {
+            showNotification('تعذر تحميل دعم الخط العربي في PDF، سيتم المتابعة بوضع التوافق', 'warning');
+        }
+
+        const originalText = doc.text.bind(doc);
+        const formatArabicPdfText = (value) => {
+            if (typeof value !== 'string') {
+                return value;
+            }
+            if (typeof doc.processArabic === 'function') {
+                return doc.processArabic(value);
+            }
+            return value;
+        };
+
+        doc.text = function(text, x, y, options, transform) {
+            const normalizedText = Array.isArray(text)
+                ? text.map(item => formatArabicPdfText(item))
+                : formatArabicPdfText(text);
+            return originalText(normalizedText, x, y, options, transform);
+        };
+    }
     
     // ألوان القالب
     const colors = {
@@ -1022,9 +1299,16 @@ function printResultsPDF() {
     // شعار الجامعة (دائرة مع أيقونة)
     doc.setFillColor(255, 255, 255);
     doc.circle(25, 17.5, 8, 'F');
-    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
     doc.setTextColor(...colors.primary);
-    doc.text('🎓', 21, 21);
+    doc.text('SEU', 20.5, 20.5);
+
+    if (isArabic) {
+        doc.setFont('NotoNaskhArabic', 'normal');
+    } else {
+        doc.setFont('helvetica', 'normal');
+    }
     
     // عنوان الجامعة
     doc.setTextColor(255, 255, 255);
@@ -1094,23 +1378,19 @@ function printResultsPDF() {
     const statsData = [
         { 
             title: isArabic ? 'إجمالي الساعات' : 'Total Hours', 
-            value: totalHours,
-            icon: '⏰'
+            value: totalHours
         },
         { 
             title: isArabic ? 'إجمالي النقاط' : 'Total Points', 
-            value: totalPoints,
-            icon: '📊'
+            value: totalPoints
         },
         { 
             title: isArabic ? 'عدد المواد' : 'Total Courses', 
-            value: courses.length.toString(),
-            icon: '📚'
+            value: courses.length.toString()
         },
         { 
             title: isArabic ? 'المعدل التراكمي' : 'Cumulative GPA', 
-            value: cumulativeGPADisplay,
-            icon: '🎯'
+            value: cumulativeGPADisplay
         }
     ];
     
@@ -1127,15 +1407,11 @@ function printResultsPDF() {
         doc.setDrawColor(...colors.secondary);
         doc.roundedRect(x, y, cardWidth, 30, 2, 2, 'FD');
         
-        // الأيقونة
-        doc.setFontSize(12);
-        doc.text(statsData[i].icon, x + cardWidth/2, y + 8, { align: 'center' });
-        
         // القيمة
         doc.setFontSize(14);
         doc.setTextColor(...colors.primary);
         const displayValue = statsData[i].value.length > 8 ? statsData[i].value.substring(0, 6) + '...' : statsData[i].value;
-        doc.text(displayValue, x + cardWidth/2, y + 16, { align: 'center' });
+        doc.text(displayValue, x + cardWidth/2, y + 13, { align: 'center' });
         
         // العنوان
         doc.setFontSize(7);
