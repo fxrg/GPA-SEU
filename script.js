@@ -1121,8 +1121,9 @@ function openNativePrintReport(isArabic) {
         * { box-sizing: border-box; }
         body { margin:0; background:#fff; color:var(--text); font-family:${isArabic ? '"Amiri", serif' : '"Poppins", sans-serif'}; }
         .page { width:210mm; min-height:297mm; margin:0 auto; background:#fff; }
-        .header { background:var(--primary); color:#fff; padding:18mm 12mm 8mm; display:flex; align-items:center; justify-content:space-between; }
-        .logo { width:22mm; height:22mm; border-radius:50%; background:#fff; color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:"Poppins", sans-serif; }
+        .header { position:relative; background:var(--primary); color:#fff; padding:18mm 12mm 8mm; min-height:44mm; display:flex; align-items:center; justify-content:center; }
+        .logo { position:absolute; top:50%; transform:translateY(-50%); ${isArabic ? 'right:12mm;' : 'left:12mm;'} width:22mm; height:22mm; border-radius:50%; background:#fff; color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:"Poppins", sans-serif; }
+        .headtxt { text-align:center; width:100%; }
         .headtxt h1 { margin:0; font-size:10mm; font-weight:700; }
         .headtxt p { margin:2mm 0 0; font-size:5mm; opacity:.9; }
         .content { padding:14mm 12mm; }
@@ -1154,7 +1155,7 @@ function openNativePrintReport(isArabic) {
     <div class="page">
         <div class="header">
             <div class="logo">SEU</div>
-            <div class="headtxt" style="text-align:${isArabic ? 'right' : 'left'};">
+            <div class="headtxt">
                 <h1>${escapeHtml(titleMain)}</h1>
                 <p>${escapeHtml(titleSub)}</p>
             </div>
